@@ -1,7 +1,9 @@
 // Zoom, pan and full screen for [data-zoomable] viewports.
 //  kind "svg":   the SVG width is scaled, the viewport scrolls.
 //  kind "stage": a fixed-width stage is scaled with a CSS transform, so the network layout and its arrows stay intact.
-// At 100% the diagram fits the viewport width. Ctrl or Cmd with the wheel zooms around the pointer; dragging pans.
+// The frame keeps one size whatever the zoom; zooming changes what is inside it.
+// At 100% the diagram fits the frame width. Ctrl or Cmd with the wheel zooms around the pointer; dragging pans.
+// Full screen shows only the frame (diagram and its toolbar), not the rest of the page.
 (() => {
   'use strict';
   const MIN = 0.4, MAX = 3, STEP = 1.2;
@@ -13,47 +15,54 @@
     const sizer = vp.querySelector('.zoom-sizer');
     const stage = vp.querySelector('.zoom-stage');
     const svg = vp.querySelector(':scope > svg');
-    const target = vp.closest('[role=tabpanel]');
     let z = 1;
 
-    const button = (text, name, onClick, cls = '') => {
+    const frame = document.createElement('div');
+    frame.className = 'zoom-frame';
+    vp.parentNode.insertBefore(frame, vp);
+    frame.append(vp);
+
+    const button = (icon, name, onClick) => {
       const b = document.createElement('button');
       b.type = 'button';
-      b.className = 'btn zoom-btn ' + cls;
-      b.textContent = text;
+      b.className = 'btn zoom-btn';
+      b.dataset.icon = icon;
+      b.title = name;
       b.setAttribute('aria-label', name);
       b.addEventListener('click', onClick);
       return b;
     };
+    const sep = () => Object.assign(document.createElement('span'), { className: 'zoom-sep' });
     const level = document.createElement('output');
     level.className = 'zoom-level';
     level.setAttribute('aria-live', 'polite');
-    const hint = document.createElement('span');
-    hint.className = 'zoom-hint';
-    hint.textContent = kind === 'stage' ? 'Ctrl and scroll to zoom. Drag a box to move it.' : 'Ctrl and scroll to zoom. Drag to move.';
 
     const bar = document.createElement('div');
     bar.className = 'zoom-bar';
     bar.setAttribute('role', 'group');
-    bar.setAttribute('aria-label', label + ' zoom');
+    bar.setAttribute('aria-label', label + ' controls');
     bar.append(
-      button('−', 'Zoom out', () => set(z / STEP)),
+      button('zoom-out', 'Zoom out', () => set(z / STEP)),
       level,
-      button('+', 'Zoom in', () => set(z * STEP)),
-      button('Fit', 'Fit to width', () => set(1, null, null, true))
+      button('zoom-in', 'Zoom in', () => set(z * STEP)),
+      button('fit', 'Fit to width', () => set(1, null, null, true))
     );
-    if (kind === 'stage') bar.append(button('Reset layout', 'Reset box positions', () => vp.querySelector('.network').dispatchEvent(new CustomEvent('resetlayout'))));
-    bar.append(hint);
+    if (kind === 'stage') {
+      bar.append(button('layout', 'Reset box positions', () => vp.querySelector('.network').dispatchEvent(new CustomEvent('resetlayout'))));
+    }
     let fullBtn = null;
-    if (target && document.fullscreenEnabled) {
-      fullBtn = button('Full screen', 'Enter full screen', toggleFull, 'zoom-full');
+    if (document.fullscreenEnabled) {
+      bar.append(sep());
+      fullBtn = button('fullscreen', 'Enter full screen', toggleFull);
       bar.append(fullBtn);
     }
-    vp.before(bar);
+    frame.append(bar);
 
     vp.tabIndex = 0;
     vp.setAttribute('role', 'group');
     vp.setAttribute('aria-label', label + '. Press plus or minus to zoom, zero to fit.');
+
+    const isFull = () => document.fullscreenElement === frame;
 
     // The frame keeps one size whatever the zoom. Zooming only changes what is inside it.
     function setFrame(h) {
@@ -68,12 +77,12 @@
         const base = Math.max(w, 720);
         const vb = svg.viewBox.baseVal;
         const natural = vb && vb.width ? base * vb.height / vb.width : 600;
-        setFrame(Math.max(360, Math.min(natural, window.innerHeight * 0.8)));
+        setFrame(isFull() ? window.innerHeight : Math.max(360, Math.min(natural, window.innerHeight * 0.8)));
         svg.style.width = Math.round(base * z) + 'px';
       } else {
         stage.style.width = w + 'px';
         stage.style.transform = 'scale(' + z + ')';
-        setFrame(stage.offsetHeight);
+        setFrame(isFull() ? window.innerHeight : stage.offsetHeight);
         sizer.style.width = Math.round(w * z) + 'px';
         sizer.style.height = Math.round(stage.offsetHeight * z) + 'px';
         vp.classList.add('is-ready');
@@ -98,13 +107,14 @@
 
     function toggleFull() {
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-      else target.requestFullscreen().catch(() => {});
+      else frame.requestFullscreen().catch(() => {});
     }
     document.addEventListener('fullscreenchange', () => {
       if (!fullBtn) return;
-      const on = document.fullscreenElement === target;
-      fullBtn.textContent = on ? 'Exit full screen' : 'Full screen';
-      fullBtn.setAttribute('aria-label', on ? 'Exit full screen' : 'Enter full screen');
+      const on = isFull();
+      fullBtn.dataset.icon = on ? 'exit-fullscreen' : 'fullscreen';
+      fullBtn.title = on ? 'Exit full screen' : 'Enter full screen';
+      fullBtn.setAttribute('aria-label', fullBtn.title);
       apply();
     });
 
@@ -138,7 +148,7 @@
     vp.addEventListener('pointerup', endDrag);
     vp.addEventListener('pointercancel', endDrag);
 
-    // Re-fit when the viewport changes size or a hidden tab becomes visible.
+    // Re-fit when the frame changes size or a hidden tab becomes visible.
     window.addEventListener('resize', apply);
     const ro = new ResizeObserver(apply);
     ro.observe(vp);

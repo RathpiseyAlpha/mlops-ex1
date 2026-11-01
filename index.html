@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/simulator.css">
+<link rel="stylesheet" href="css/icons.css">
 <link rel="stylesheet" href="css/content.css">
 <link rel="stylesheet" href="css/zoom.css">
 <link rel="stylesheet" href="css/responsive.css">
@@ -37,7 +38,7 @@
 <div class="sim-layout">
 <aside class="panel controls" aria-label="Simulation controls">
 <div class="field"><label for="scenario">Scenario</label><select id="scenario"><option value="full-loop" selected>Continuous story: four looping episodes</option><option value="engineer">Data engineer: ingestion code push</option><option value="healthy">Fresh labeled data: healthy model</option><option value="code">Git push: all code tests pass</option><option value="ci-fail">Git push: code tests fail</option><option value="bad-data">Fresh data: data checks fail</option><option value="weak">Fresh data: weaker candidate</option><option value="no-labels">Drift alert: labels not ready</option><option value="unchanged">Daily check: data unchanged</option><option value="regression">New model: monitored regression</option></select></div>
-<div class="actions"><button class="btn primary" id="playButton">Play looping story</button><button class="btn" id="nextButton">Next step</button><button class="btn" id="resetButton">Reset</button></div>
+<div class="actions"><button class="btn primary" id="playButton" data-icon="play">Play looping story</button><button class="btn" id="nextButton" data-icon="next">Next step</button><button class="btn" id="resetButton" data-icon="reset">Reset</button></div>
 <div class="small-controls"><label>Speed <select id="speed"><option value="2200">Slow</option><option value="1400" selected>Normal</option><option value="650">Fast</option></select></label><label class="check"><input type="checkbox" id="repeat"> Repeat cycle</label></div>
 <details class="policy-box"><summary>Promotion policy <span class="sub" id="policyLabel"></span></summary><fieldset class="policy"><legend class="sr-only">Illustrative promotion policy</legend><div><div class="range-label"><label for="candidateScore">Candidate validation score</label><output id="candidateOutput" for="candidateScore">95%</output></div><input id="candidateScore" type="range" min="80" max="99" step="0.5" value="95"></div><div><div class="range-label"><label for="minimumScore">Minimum allowed score</label><output id="minimumOutput" for="minimumScore">90%</output></div><input id="minimumScore" type="range" min="80" max="98" step="0.5" value="90"></div><div><div class="range-label"><label for="minimumGain">Gain over current champion</label><output id="gainOutput" for="minimumGain">1 pp</output></div><input id="minimumGain" type="range" min="0" max="5" step="0.5" value="1"></div><p class="baseline">Starting champion: <b>v3 at 92%</b>. Both models are compared on the same eligible validation snapshot. "pp" means percentage points.</p></fieldset></details>
 <p class="scenario-hint" id="scenarioHint"></p>
@@ -46,7 +47,7 @@
 <div class="story-bar span-all" id="storyBar" aria-label="Looping story progress"><div class="story-heading"><h2 id="storyTitle">1. ML developer writes training code</h2><span class="tag" id="storyRound">Replay 1, episode 1 of 4</span></div><ol class="story-episodes"><li data-episode="0">Developer pushes training code</li><li data-episode="1">Data engineer pushes ingestion code</li><li data-episode="2">New data arrives, no push</li><li data-episode="3">Regression found, rolled back</li></ol><p id="storyHint">The story plays automatically. Pause or use Next step to inspect any action.</p></div>
 <div class="sim-stage span-all">
 <section class="panel network-panel" aria-label="Animated server network">
-<div class="panel-head"><h2>The server network</h2><span class="tag" id="runState">Ready</span></div><div class="network-note">Example private network 10.0.0.0/24. Select a box to see what it does. Text on each arrow says what travels along it. Drag a box to rearrange; arrows follow.</div><div class="arrow-key" aria-label="Arrow styles"><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--code)"/></svg>Code and deployment: solid</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--data)" stroke-dasharray="9 7"/></svg>Data and training: dashed</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--model)" stroke-dasharray="1 7"/></svg>Models and evaluation: dotted</span></div>
+<div class="panel-head"><h2>The server network</h2><span class="tag" id="runState">Ready</span></div><div class="network-note">Example private network 10.0.0.0/24. Select a box to see what it does. Text on each arrow says what travels along it. Drag a box to rearrange; arrows follow. Ctrl and scroll to zoom.</div><div class="arrow-key" aria-label="Arrow styles"><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--code)"/></svg>Code and deployment: solid</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--data)" stroke-dasharray="9 7"/></svg>Data and training: dashed</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--model)" stroke-dasharray="1 7"/></svg>Models and evaluation: dotted</span></div>
 <div class="zoom-viewport" data-zoomable="stage" data-zoom-label="Network diagram"><div class="zoom-sizer"><div class="zoom-stage">
 <div class="network" id="network">
 <svg class="net-lines" id="networkLines" aria-hidden="true"><defs><marker id="netArrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path d="M1 1.2L8.6 5L1 8.8"/></marker></defs></svg>
@@ -205,5 +206,6 @@ model = mlflow.sklearn.load_model(
 <script src="js/simulation.js"></script>
 <script src="js/diagrams.js"></script>
 <script src="js/zoom.js"></script>
+<script src="js/button-icons.js"></script>
 </body>
 </html>

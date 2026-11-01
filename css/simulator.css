@@ -21,7 +21,7 @@
 .policy-box .sub{font-weight:400;margin-left:var(--space-2)}
 .policy{border:0;padding:0;margin:var(--space-3) 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-3) var(--space-6)}
 .range-label{display:flex;justify-content:space-between;gap:8px;font:14px var(--display)}
-.range-label output{font:600 13px var(--mono)}
+.range-label output{font:600 13px var(--mono);white-space:nowrap}
 input[type=range]{width:100%;margin:var(--space-2) 0 0;accent-color:var(--ink)}
 .baseline{grid-column:1/-1;font-size:14px;color:var(--muted);margin:0;line-height:1.5}
 .swatch{width:20px;height:4px;background:var(--data);border-radius:2px}
@@ -179,7 +179,7 @@ input[type=range]{width:100%;margin:var(--space-2) 0 0;accent-color:var(--ink)}
  .controls .field{max-width:280px}
  .controls{padding:var(--space-3) var(--space-5)}
  .policy-box{flex:0 1 auto;border-top:0;padding:0 0 10px;position:relative;align-self:flex-end}
- .policy-box .policy{position:absolute;top:100%;left:0;z-index:6;width:min(720px,80vw);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-4);box-shadow:0 12px 32px rgba(0,0,0,.18)}
+ .policy-box[open]{flex:1 0 100%;border-top:1px solid var(--line);padding-top:var(--space-3)}
  .story-bar p{display:none}
  .story-heading h2{font-size:20px}
  .story-episodes{margin-top:8px}

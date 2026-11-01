@@ -29,15 +29,17 @@ css/tokens.css      color, type, space, radius, icon and arrow tokens (light and
 css/base.css        reset, typography, top bar, tabs
 css/simulator.css   controls, network, gate rail, step panel
 css/content.css     lessons, coverage, roles, diagrams
-css/zoom.css        zoom bar, pan and full-screen styles
+css/icons.css       button icons (masks over currentColor)
+css/zoom.css        floating zoom toolbar, pan and full-screen styles
 css/responsive.css  breakpoints, reduced motion, print
 js/theme-init.js    sets the theme before first paint
 js/simulation.js    scenarios, arrows, gate lamps, tabs
 js/diagrams.js      sequence and swimlane diagrams, drawn from data
 js/zoom.js          zoom, pan and full screen for the network and both diagrams
+js/button-icons.js  keeps the play button's icon in step with its label
 ```
 
-Zoom: use the minus, plus and Fit buttons, or hold Ctrl and scroll. The frame keeps its size; the content scrolls inside it. Drag empty space to move around when zoomed in.
+Zoom: a small toolbar floats inside each diagram, with zoom out, zoom in, fit to width, reset box positions (network only) and full screen. Full screen shows only the diagram. You can also hold Ctrl and scroll. The frame keeps its size; the content scrolls inside it. Drag empty space to move around when zoomed in.
 
 Boxes: drag any server box to rearrange the network and its arrows follow. With a box focused, Alt and an arrow key nudges it (add Shift for bigger steps). Reset layout puts them back. Dragging uses a mouse or pen; touch screens can tap boxes but not move them.
 

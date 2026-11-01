@@ -1,27 +1,25 @@
-/* Zoom, pan and full screen for the network and the two diagrams. */
-.zoom-bar{display:flex;align-items:center;flex-wrap:wrap;gap:var(--space-2);margin:0 0 var(--space-3);font:14px var(--display);color:var(--muted)}
-.panel>.zoom-bar{padding:var(--space-3) var(--space-6) 0;margin:0}
-.zoom-btn{padding:6px 12px;font-size:15px;min-width:38px}
-.zoom-level{min-width:54px;text-align:center;font:600 14px var(--mono);color:var(--ink)}
-.zoom-hint{margin-left:var(--space-2)}
-.zoom-bar .zoom-full{margin-left:auto}
+/* Zoom, pan and full screen. The frame wraps the viewport; the toolbar floats inside the frame. */
+.zoom-frame{position:relative}
+.panel>.zoom-frame{margin:var(--space-3) var(--space-6) var(--space-5)}
 
 .zoom-viewport{overflow:auto;position:relative;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--soft)}
-.panel>.zoom-viewport{margin:var(--space-3) var(--space-6) var(--space-5)}
 .zoom-viewport.is-pannable{cursor:grab}
 .zoom-viewport.is-dragging{cursor:grabbing;user-select:none}
 .zoom-sizer{position:relative;margin-inline:auto}
-.zoom-stage{transform-origin:0 0}
+.zoom-stage{transform-origin:0 0;padding:var(--space-7) var(--space-6) var(--space-6)}
 .zoom-viewport.is-ready .zoom-stage{position:absolute;left:0;top:0}
-.zoom-stage{padding:var(--space-7) var(--space-6) var(--space-6)}
 
-/* full screen: the whole tab panel fills the screen and scrolls */
-[role=tabpanel]:fullscreen{background:var(--ground);color:var(--ink);padding:var(--space-6);overflow:auto}
-[role=tabpanel]:fullscreen .controls{position:static}
+.zoom-bar{position:absolute;top:10px;right:22px;z-index:6;display:flex;align-items:center;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:0 2px 10px rgba(0,0,0,.14)}
+.zoom-btn{padding:0;width:34px;height:34px;min-width:0;display:inline-flex;align-items:center;justify-content:center}
+.zoom-level{min-width:50px;text-align:center;font:600 13px var(--mono);color:var(--ink)}
+.zoom-sep{width:1px;align-self:stretch;margin:4px 2px;background:var(--line)}
+
+/* full screen: only the diagram frame fills the screen */
+.zoom-frame:fullscreen{background:var(--ground);margin:0}
+.zoom-frame:fullscreen .zoom-viewport{border:0;border-radius:0}
+.zoom-frame:fullscreen .zoom-bar{top:14px;right:26px}
 
 @media(max-width:1100px){
- .panel>.zoom-bar{padding-left:var(--space-4);padding-right:var(--space-4)}
- .panel>.zoom-viewport{margin-inline:var(--space-4)}
+ .panel>.zoom-frame{margin-inline:var(--space-4)}
 }
-@media(max-width:640px){.zoom-hint{display:none}}
-@media print{.zoom-bar{display:none}.zoom-viewport{overflow:visible}.zoom-viewport.is-ready .zoom-stage{position:static;transform:none!important;width:auto!important}.zoom-sizer{width:auto!important;height:auto!important}}
+@media print{.zoom-bar{display:none}.zoom-viewport{overflow:visible;height:auto!important}.zoom-viewport.is-ready .zoom-stage{position:static;transform:none!important;width:auto!important}.zoom-sizer{width:auto!important;height:auto!important}}
