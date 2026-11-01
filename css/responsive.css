@@ -1,0 +1,64 @@
+/* Responsive, reduced motion and print rules. Loaded last so it can override the rest. */
+@media(max-width:1100px){
+ .wrap{padding:20px}
+ .main-stack{grid-template-columns:1fr}
+ .network{margin:var(--space-6) var(--space-4) var(--space-5)}
+ .node{padding:14px 12px 14px 20px}
+ .node h3{font-size:19px}
+ .arrow-key,.panel-head,.network-note,.domains,.feedback-loop{padding-left:var(--space-4);padding-right:var(--space-4);margin-left:0;margin-right:0}
+ .gates{padding-left:16px;padding-right:16px}
+}
+@media(max-width:850px){
+ .lesson-grid,.cov-grid,.role-grid,.fn-grid{grid-template-columns:1fr}
+ .lesson.wide{grid-column:auto}
+ .policy{grid-template-columns:1fr}
+ .gates{grid-template-columns:1fr 1fr;row-gap:2px}
+ .gates li::after{display:none}
+ .gates li{grid-template-columns:auto 1fr;column-gap:11px;align-items:center}
+ .gates .lamp{grid-row:1/3;margin-bottom:0}
+ .gates li:last-child{grid-column:1/-1}
+}
+@media(max-width:640px){
+ .network{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"git ci" "jupyter airflow" "clickhouse mlflow";column-gap:36px;row-gap:56px;margin:var(--space-5) var(--space-3)}
+ #node-jupyter,#node-airflow{align-self:stretch}
+ [data-edge-group="inspect"]{display:none}
+ .node{min-height:176px}
+ .controls .field{max-width:none}
+ .actions{width:100%}.actions .btn{flex:1;min-width:0}
+}
+@media(max-width:520px){
+ .wrap{padding:16px 14px 30px}
+ .brand{font-size:19px}
+ .intro{margin-top:22px}
+ .intro p{font-size:16.5px}
+ .node{padding:10px 9px 10px 15px}
+ .node h3{font-size:17px}
+ .node-icon{width:var(--icon-sm);height:var(--icon-sm)}
+ .endpoint{font-size:10.5px}
+ .node-role{font-size:13px}
+ .node-state{font-size:13px}
+ .edge-caption{font-size:10.5px}
+ .status-bar>div{padding:11px 10px}
+ .status-bar strong{font-size:12.5px}
+ .phase-row,.step-copy,.detail,.event-panel{padding-left:15px;padding-right:15px}
+ .step-copy h3{font-size:21px}
+ .story-heading h2{font-size:21px}
+ .story-episodes{grid-template-columns:1fr 1fr}
+ .compare{grid-template-columns:1fr}
+ .lesson h2{font-size:23px}
+ .verdict h2{font-size:26px}
+ .gates{padding-left:15px;padding-right:15px}
+ .role dl{grid-template-columns:1fr;gap:2px}
+ .role dd{margin-bottom:var(--space-3)}
+}
+@media(prefers-reduced-motion:reduce){
+ *{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+ .net-lines circle{display:none}
+}
+@media print{
+ .controls,.tabs,.tools,.actions,.events,.filters{display:none}.diagram-scroll{overflow:visible}
+ .sim-layout,.lesson-grid,.cov-grid{display:block}
+ .panel{break-inside:avoid;margin-bottom:16px}
+ .wrap{padding:0}
+ body{background:#fff;color:#111}
+}

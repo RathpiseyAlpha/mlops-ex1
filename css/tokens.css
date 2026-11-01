@@ -1,0 +1,26 @@
+/* Design tokens: color, type, space, radius, icon size and arrow style. Light and dark themes. */
+:root{
+ color-scheme:light;
+ --ground:#E4E8E6;--panel:#F7F8F6;--ink:#17252C;--muted:#4F6068;--line:#C5CECC;--soft:#EAEEEC;
+ --accent:#17252C;--accent-soft:#DCE3E1;
+ --code:#BF3F08;--data:#1F5FBF;--model:#7A3EA8;
+ --go:#17794A;--go-lamp:#1FA35E;--go-soft:#DDF1E5;
+ --hold:#8A5700;--hold-lamp:#EFA700;--hold-soft:#FBEBC8;
+ --stop:#B3202D;--stop-lamp:#D63645;--stop-soft:#F8DDE0;
+ --display:Bahnschrift,"DIN Alternate","DIN 1451 Std","Roboto Condensed","Arial Narrow","Segoe UI",system-ui,sans-serif;
+ --serif:"Sitka Text","Iowan Old Style",Charter,Georgia,serif;
+ --mono:ui-monospace,SFMono-Regular,Consolas,monospace;
+ --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;--space-8:64px;
+ --radius-sm:4px;--radius-md:6px;--radius-lg:8px;
+ --icon-sm:20px;--icon-md:32px;--icon-lg:48px;
+ --arrow-width:2.4px;--arrow-width-active:3.6px;
+}
+[data-theme="dark"]{
+ color-scheme:dark;
+ --ground:#0E161A;--panel:#152027;--ink:#E7EEF0;--muted:#9CAEB5;--line:#2B3A42;--soft:#1B2830;
+ --accent:#E7EEF0;--accent-soft:#26353D;
+ --code:#FF9B6A;--data:#7FB1FF;--model:#CBA0F2;
+ --go:#5DD493;--go-lamp:#2FBF78;--go-soft:#14352A;
+ --hold:#F4BE48;--hold-lamp:#F0A500;--hold-soft:#3A2E12;
+ --stop:#FF8591;--stop-lamp:#E5484D;--stop-soft:#3F1D24;
+}
