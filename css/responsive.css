@@ -20,7 +20,7 @@
  .gates li:last-child{grid-column:1/-1}
 }
 @media(max-width:640px){
- .network{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"git ci" "jupyter airflow" "clickhouse mlflow";column-gap:36px;row-gap:56px}
+ .network{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-areas:"git ci" "jupyter airflow" "clickhouse mlflow" "app api";column-gap:36px;row-gap:56px}
  .zoom-stage{padding:var(--space-5) var(--space-3)}
  #node-jupyter,#node-airflow{align-self:stretch}
  [data-edge-group="inspect"]{display:none}

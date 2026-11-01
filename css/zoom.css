@@ -1,15 +1,16 @@
-/* Zoom, pan and full screen. The frame wraps the viewport; the toolbar floats inside the frame. */
+/* A Figma-style canvas: the frame clips, the content moves and scales inside it. The toolbar floats in the frame. */
 .zoom-frame{position:relative}
 .panel>.zoom-frame{margin:var(--space-3) var(--space-6) var(--space-5)}
 
-.zoom-viewport{overflow:auto;position:relative;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--soft)}
-.zoom-viewport.is-pannable{cursor:grab}
+.zoom-viewport{overflow:hidden;position:relative;cursor:grab;border:1px solid var(--line);border-radius:var(--radius-md);background-color:var(--soft);background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:22px 22px;touch-action:pan-y}
 .zoom-viewport.is-dragging{cursor:grabbing;user-select:none}
-.zoom-sizer{position:relative;margin-inline:auto}
-.zoom-stage{transform-origin:0 0;padding:var(--space-7) var(--space-6) var(--space-6)}
-.zoom-viewport.is-ready .zoom-stage{position:absolute;left:0;top:0}
+.zoom-sizer{position:static}
+.zoom-content{transform-origin:0 0}
+.zoom-viewport.is-ready .zoom-content{position:absolute;left:0;top:0}
+.zoom-stage{padding:var(--space-7) var(--space-6) var(--space-6)}
+.zoom-viewport svg.zoom-content{display:block;max-width:none;height:auto}
 
-.zoom-bar{position:absolute;top:10px;right:22px;z-index:6;display:flex;align-items:center;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:0 2px 10px rgba(0,0,0,.14)}
+.zoom-bar{position:absolute;top:10px;right:12px;z-index:6;display:flex;align-items:center;gap:4px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-md);box-shadow:0 2px 10px rgba(0,0,0,.14)}
 .zoom-btn{padding:0;width:34px;height:34px;min-width:0;display:inline-flex;align-items:center;justify-content:center}
 .zoom-level{min-width:50px;text-align:center;font:600 13px var(--mono);color:var(--ink)}
 .zoom-sep{width:1px;align-self:stretch;margin:4px 2px;background:var(--line)}
@@ -17,9 +18,9 @@
 /* full screen: only the diagram frame fills the screen */
 .zoom-frame:fullscreen{background:var(--ground);margin:0}
 .zoom-frame:fullscreen .zoom-viewport{border:0;border-radius:0}
-.zoom-frame:fullscreen .zoom-bar{top:14px;right:26px}
+.zoom-frame:fullscreen .zoom-bar{top:14px;right:18px}
 
 @media(max-width:1100px){
  .panel>.zoom-frame{margin-inline:var(--space-4)}
 }
-@media print{.zoom-bar{display:none}.zoom-viewport{overflow:visible;height:auto!important}.zoom-viewport.is-ready .zoom-stage{position:static;transform:none!important;width:auto!important}.zoom-sizer{width:auto!important;height:auto!important}}
+@media print{.zoom-bar{display:none}.zoom-viewport{overflow:visible;height:auto!important;background-image:none}.zoom-viewport.is-ready .zoom-content{position:static;transform:none!important;width:auto!important}}

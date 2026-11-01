@@ -45,14 +45,16 @@ input[type=range]{width:100%;margin:var(--space-2) 0 0;accent-color:var(--ink)}
 .arrow-key span{display:flex;align-items:center;gap:var(--space-2)}
 .arrow-key svg{width:48px;height:14px;overflow:visible}
 .arrow-key path{fill:none;stroke-width:2.6;stroke-linecap:round}
-.network{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:". git ci" "jupyter clickhouse airflow" "jupyter mlflow airflow";column-gap:clamp(80px,7.5vw,150px);row-gap:clamp(84px,8vw,130px)}
+.network{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:". git ci" "jupyter clickhouse airflow" "jupyter mlflow airflow" ". api app";column-gap:clamp(80px,7.5vw,150px);row-gap:clamp(58px,5vw,84px)}
 .net-key{display:none}
+#node-api{grid-area:api}#node-app{grid-area:app}
 #node-git{grid-area:git}#node-ci{grid-area:ci}#node-clickhouse{grid-area:clickhouse}#node-mlflow{grid-area:mlflow}
 #node-jupyter{grid-area:jupyter;align-self:center}#node-airflow{grid-area:airflow;align-self:center}
 .net-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 .net-lines .edge-group path{fill:none;stroke:var(--flow-color,var(--muted));stroke-width:var(--arrow-width);stroke-linecap:round;opacity:.55}
 .net-lines .edge-group[data-lane=data] path{stroke-dasharray:9 7}
 .net-lines .edge-group[data-lane=model] path{stroke-dasharray:1 7}
+.net-lines .edge-group[data-lane=serve] path{stroke-dasharray:14 5 2 5}
 .net-lines .edge-group path.active{opacity:1;stroke-width:var(--arrow-width-active)}
 #netArrow path{fill:none;stroke:var(--muted);stroke:context-stroke;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .net-lines circle{fill:var(--flow-color,var(--ink));opacity:0}
@@ -61,9 +63,9 @@ input[type=range]{width:100%;margin:var(--space-2) 0 0;accent-color:var(--ink)}
 .edge-label-bg{fill:var(--panel);stroke:var(--line);stroke-width:1}
 .edge-group.is-active .edge-label-bg{stroke:var(--flow-color)}
 .edge-group.is-active .edge-caption{fill:var(--ink)}
-.node{position:relative;z-index:1;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--panel);text-align:left;padding:var(--space-4) var(--space-4) var(--space-4) var(--space-5);min-width:0;min-height:156px;width:100%;display:block;transition:border-color .2s,box-shadow .2s}
+.node{position:relative;z-index:1;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--panel);text-align:left;padding:var(--space-4) var(--space-4) var(--space-4) var(--space-5);min-width:0;min-height:132px;width:100%;display:block;transition:border-color .2s,box-shadow .2s}
 .node::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;border-radius:5px 0 0 5px;background:var(--lane,var(--line))}
-.node[data-lane=code]{--lane:var(--code)}.node[data-lane=data]{--lane:var(--data)}.node[data-lane=model]{--lane:var(--model)}
+.node[data-lane=code]{--lane:var(--code)}.node[data-lane=data]{--lane:var(--data)}.node[data-lane=model]{--lane:var(--model)}.node[data-lane=serve]{--lane:var(--serve)}
 .node[data-lane=all]::before{background:linear-gradient(to bottom,var(--code) 33.4%,var(--data) 33.4% 66.7%,var(--model) 66.7%)}
 .node:hover{border-color:var(--muted)}
 .node.selected{outline:2px solid var(--ink);outline-offset:3px}

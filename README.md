@@ -1,7 +1,7 @@
 # Continuous ML workflow
 
 An offline, interactive explainer for a continuous machine-learning pipeline built from
-Git, CI, Jupyter, Airflow, ClickHouse and MLflow. Nothing in it connects to a real server.
+Git, CI, Jupyter, Airflow, ClickHouse and MLflow, plus a Prediction API and an App that use the champion model. Nothing in it connects to a real server.
 
 **Live page:** https://rathpiseyalpha.github.io/mlops-ex1/
 
@@ -14,7 +14,7 @@ To run it locally, open `index.html` in a browser. No build step and no network 
 | Tab | What it shows |
 |---|---|
 | Watch it run | Animated network with curved, labelled arrows, the step explanation and test-gate lamps beside it, and ten scenarios. Zoom, pan and full screen |
-| Node roles | What each server does, keeps, talks to, and leaves to others, with an MLflow spotlight |
+| Node roles | What each server does, keeps, talks to, and leaves to others, with an MLflow spotlight and a request-by-request sketch of how an app uses the champion model |
 | Sequence | Message-by-message order of one full cycle. Zoom, pan and full screen |
 | Swimlane | Who does each step and where a run can stop. Zoom, pan and full screen |
 | What gets tested | Code, data, model and monitoring tests |
@@ -39,7 +39,7 @@ js/zoom.js          zoom, pan and full screen for the network and both diagrams
 js/button-icons.js  keeps the play button's icon in step with its label
 ```
 
-Zoom: a small toolbar floats inside each diagram, with zoom out, zoom in, fit to width, reset box positions (network only) and full screen. Full screen shows only the diagram. You can also hold Ctrl and scroll. The frame keeps its size; the content scrolls inside it. Drag empty space to move around when zoomed in.
+Canvas: each diagram is a pan-and-zoom canvas like Figma. Drag any empty background to move around, hold Ctrl and scroll to zoom at the pointer, or use the arrow keys and plus and minus when the frame has focus. A small toolbar floats inside each diagram, with zoom out, zoom in, fit to width, reset box positions (network only) and full screen. Full screen shows only the diagram. Fit frames the whole diagram. The frame keeps its size; the content scrolls inside it. Drag empty space to move around when zoomed in.
 
 Boxes: drag any server box to rearrange the network and its arrows follow. With a box focused, Alt and an arrow key nudges it (add Shift for bigger steps). Reset layout puts them back. Dragging uses a mouse or pen; touch screens can tap boxes but not move them.
 

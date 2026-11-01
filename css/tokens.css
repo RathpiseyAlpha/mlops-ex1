@@ -3,7 +3,7 @@
  color-scheme:light;
  --ground:#E4E8E6;--panel:#F7F8F6;--ink:#17252C;--muted:#4F6068;--line:#C5CECC;--soft:#EAEEEC;
  --accent:#17252C;--accent-soft:#DCE3E1;
- --code:#BF3F08;--data:#1F5FBF;--model:#7A3EA8;
+ --code:#BF3F08;--data:#1F5FBF;--model:#7A3EA8;--serve:#0B7C86;
  --go:#17794A;--go-lamp:#1FA35E;--go-soft:#DDF1E5;
  --hold:#8A5700;--hold-lamp:#EFA700;--hold-soft:#FBEBC8;
  --stop:#B3202D;--stop-lamp:#D63645;--stop-soft:#F8DDE0;
@@ -19,7 +19,7 @@
  color-scheme:dark;
  --ground:#0E161A;--panel:#152027;--ink:#E7EEF0;--muted:#9CAEB5;--line:#2B3A42;--soft:#1B2830;
  --accent:#E7EEF0;--accent-soft:#26353D;
- --code:#FF9B6A;--data:#7FB1FF;--model:#CBA0F2;
+ --code:#FF9B6A;--data:#7FB1FF;--model:#CBA0F2;--serve:#5FD0D6;
  --go:#5DD493;--go-lamp:#2FBF78;--go-soft:#14352A;
  --hold:#F4BE48;--hold-lamp:#F0A500;--hold-soft:#3A2E12;
  --stop:#FF8591;--stop-lamp:#E5484D;--stop-soft:#3F1D24;

@@ -2,7 +2,7 @@
 /* lesson tabs: lane-coloured rules, not boxed cards */
 .lesson-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 44px}
 .lesson{border-top:4px solid var(--lane,var(--ink));padding:14px 0 6px}
-.lesson[data-lane=code]{--lane:var(--code)}.lesson[data-lane=data]{--lane:var(--data)}.lesson[data-lane=model]{--lane:var(--model)}
+.lesson[data-lane=code]{--lane:var(--code)}.lesson[data-lane=data]{--lane:var(--data)}.lesson[data-lane=model]{--lane:var(--model)}.lesson[data-lane=serve]{--lane:var(--serve)}
 .lesson.wide{grid-column:1/-1}
 .stage{font:600 15px var(--display);color:var(--lane,var(--muted))}
 .lesson h2{font:600 26px/1.15 var(--display);margin:4px 0 12px;text-wrap:balance}
@@ -68,7 +68,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel);border:1
 .ico-lg{width:var(--icon-lg);height:var(--icon-lg);flex-shrink:0;display:block}
 .role-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-6) var(--space-7)}
 .role{border-top:4px solid var(--lane,var(--ink));padding:var(--space-4) 0 var(--space-2)}
-.role[data-lane=code]{--lane:var(--code)}.role[data-lane=data]{--lane:var(--data)}.role[data-lane=model]{--lane:var(--model)}
+.role[data-lane=code]{--lane:var(--code)}.role[data-lane=data]{--lane:var(--data)}.role[data-lane=model]{--lane:var(--model)}.role[data-lane=serve]{--lane:var(--serve)}
 .role header{display:flex;align-items:center;gap:var(--space-4)}
 .role h3{font:600 26px/1.1 var(--display);margin:0}
 .role .host{font:12.5px var(--mono);color:var(--muted);margin-top:var(--space-1)}
@@ -126,3 +126,15 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel);border:1
 .sources{display:flex;gap:16px;flex-wrap:wrap;font:14px var(--display)}
 .foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;font:14px var(--display);color:var(--muted);margin-top:34px;padding-top:16px;border-top:1px solid var(--line)}
 .foot p{margin:0}
+
+/* how an app asks for a prediction: a numbered sequence of requests */
+.recipe-box{border-top:4px solid var(--serve);padding:var(--space-4) 0 0;margin:var(--space-7) 0 0}
+.recipe-box>h2{font:600 clamp(26px,3vw,34px)/1.12 var(--display);margin:0 0 var(--space-2);text-wrap:balance}
+.recipe-box>p{font-size:17px;color:var(--muted);max-width:72ch;margin:var(--space-2) 0}
+.recipe{list-style:none;counter-reset:step;padding:0;margin:var(--space-5) 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-5) var(--space-6)}
+.recipe li{counter-increment:step;border-top:2px solid var(--line);padding-top:var(--space-3);min-width:0}
+.recipe h3{font:600 19px var(--display);margin:0 0 var(--space-1)}
+.recipe h3::before{content:counter(step) ". ";color:var(--serve)}
+.recipe p{font-size:15.5px;color:var(--muted);margin:var(--space-1) 0 var(--space-2)}
+.recipe pre{max-width:none;margin:var(--space-2) 0 0;font-size:12.5px;line-height:1.65}
+@media(max-width:850px){.recipe{grid-template-columns:1fr}}

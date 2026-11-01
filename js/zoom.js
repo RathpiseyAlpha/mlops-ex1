@@ -1,21 +1,21 @@
-// Zoom, pan and full screen for [data-zoomable] viewports.
-//  kind "svg":   the SVG width is scaled, the viewport scrolls.
-//  kind "stage": a fixed-width stage is scaled with a CSS transform, so the network layout and its arrows stay intact.
-// The frame keeps one size whatever the zoom; zooming changes what is inside it.
-// At 100% the diagram fits the frame width. Ctrl or Cmd with the wheel zooms around the pointer; dragging pans.
-// Full screen shows only the frame (diagram and its toolbar), not the rest of the page.
+// A Figma-style canvas for [data-zoomable] frames.
+//  - Drag any empty background to pan. Ctrl or Cmd with the wheel zooms around the pointer.
+//  - Fit frames the whole diagram. Plus, minus, 0 and the arrow keys work when the frame has focus.
+//  - The frame keeps one size whatever the zoom; only what is inside it moves and scales.
+//  - Full screen shows only the frame (diagram and toolbar), not the rest of the page.
+//  kind "stage": a fixed-width stage (the network) is moved and scaled with a CSS transform, so its layout and arrows stay intact.
+//  kind "svg":   the SVG is moved and scaled the same way.
 (() => {
   'use strict';
-  const MIN = 0.4, MAX = 3, STEP = 1.2;
+  const MIN = 0.25, MAX = 4, STEP = 1.2, KEEP = 80, TOP = 56; // TOP leaves room for the toolbar above the diagram
   document.querySelectorAll('[data-zoomable]').forEach(setup);
 
   function setup(vp) {
     const kind = vp.dataset.zoomable;
     const label = vp.dataset.zoomLabel || 'Diagram';
-    const sizer = vp.querySelector('.zoom-sizer');
-    const stage = vp.querySelector('.zoom-stage');
-    const svg = vp.querySelector(':scope > svg');
-    let z = 1;
+    const content = kind === 'svg' ? vp.querySelector(':scope > svg') : vp.querySelector('.zoom-stage');
+    content.classList.add('zoom-content');
+    let z = 1, px = 0, py = 0, fitZ = 1, natW = 0, natH = 0, touched = false;
 
     const frame = document.createElement('div');
     frame.className = 'zoom-frame';
@@ -32,7 +32,6 @@
       b.addEventListener('click', onClick);
       return b;
     };
-    const sep = () => Object.assign(document.createElement('span'), { className: 'zoom-sep' });
     const level = document.createElement('output');
     level.className = 'zoom-level';
     level.setAttribute('aria-live', 'polite');
@@ -42,68 +41,85 @@
     bar.setAttribute('role', 'group');
     bar.setAttribute('aria-label', label + ' controls');
     bar.append(
-      button('zoom-out', 'Zoom out', () => set(z / STEP)),
+      button('zoom-out', 'Zoom out', () => zoomTo(z / STEP)),
       level,
-      button('zoom-in', 'Zoom in', () => set(z * STEP)),
-      button('fit', 'Fit to width', () => set(1, null, null, true))
+      button('zoom-in', 'Zoom in', () => zoomTo(z * STEP)),
+      button('fit', 'Fit the whole diagram', fit)
     );
     if (kind === 'stage') {
       bar.append(button('layout', 'Reset box positions', () => vp.querySelector('.network').dispatchEvent(new CustomEvent('resetlayout'))));
     }
     let fullBtn = null;
     if (document.fullscreenEnabled) {
-      bar.append(sep());
+      const sep = document.createElement('span');
+      sep.className = 'zoom-sep';
       fullBtn = button('fullscreen', 'Enter full screen', toggleFull);
-      bar.append(fullBtn);
+      bar.append(sep, fullBtn);
     }
     frame.append(bar);
 
     vp.tabIndex = 0;
     vp.setAttribute('role', 'group');
-    vp.setAttribute('aria-label', label + '. Press plus or minus to zoom, zero to fit.');
+    vp.setAttribute('aria-label', label + '. Drag the background to move. Plus and minus zoom, zero fits, arrow keys move.');
 
     const isFull = () => document.fullscreenElement === frame;
 
-    // The frame keeps one size whatever the zoom. Zooming only changes what is inside it.
-    function setFrame(h) {
-      const px = Math.round(h) + 'px';
-      if (vp.style.height !== px) vp.style.height = px;
+    function paint() {
+      content.style.transform = 'translate(' + Math.round(px) + 'px,' + Math.round(py) + 'px) scale(' + z + ')';
+      level.textContent = Math.round(z * 100) + '%';
     }
 
-    function apply() {
+    // Keep part of the diagram in view so it cannot be lost off-screen.
+    function clampPan() {
+      const w = vp.clientWidth, h = vp.clientHeight;
+      px = Math.min(w - KEEP, Math.max(KEEP - natW * z, px));
+      py = Math.min(h - KEEP, Math.max(KEEP - natH * z, py));
+    }
+
+    function layout() {
       const w = vp.clientWidth;
       if (!w) return;
+      let frameH;
       if (kind === 'svg') {
-        const base = Math.max(w, 720);
-        const vb = svg.viewBox.baseVal;
-        const natural = vb && vb.width ? base * vb.height / vb.width : 600;
-        setFrame(isFull() ? window.innerHeight : Math.max(360, Math.min(natural, window.innerHeight * 0.8)));
-        svg.style.width = Math.round(base * z) + 'px';
+        natW = Math.max(w, 720);
+        const vb = content.viewBox.baseVal;
+        natH = vb && vb.width ? natW * vb.height / vb.width : 600;
+        content.style.width = natW + 'px';
+        frameH = isFull() ? window.innerHeight : Math.max(360, Math.min(natH + TOP, window.innerHeight * 0.8));
+        fitZ = 1;
       } else {
-        stage.style.width = w + 'px';
-        stage.style.transform = 'scale(' + z + ')';
-        setFrame(isFull() ? window.innerHeight : stage.offsetHeight);
-        sizer.style.width = Math.round(w * z) + 'px';
-        sizer.style.height = Math.round(stage.offsetHeight * z) + 'px';
-        vp.classList.add('is-ready');
+        content.style.width = w + 'px';
+        natW = w;
+        natH = content.offsetHeight;
+        frameH = isFull() ? window.innerHeight : Math.max(480, Math.min(natH + TOP, window.innerHeight * 0.85));
+        fitZ = Math.min(1, (frameH - TOP) / natH);
       }
-      level.textContent = Math.round(z * 100) + '%';
-      vp.classList.toggle('is-pannable', vp.scrollWidth > vp.clientWidth + 1 || vp.scrollHeight > vp.clientHeight + 1);
+      const h = Math.round(frameH) + 'px';
+      if (vp.style.height !== h) vp.style.height = h;
+      if (!touched) { z = fitZ; px = (w - natW * z) / 2; py = TOP; }
+      clampPan();
+      vp.classList.add('is-ready');
+      paint();
     }
 
-    function set(next, ax, ay, reset) {
+    function fit() { touched = false; layout(); }
+
+    function zoomTo(next, ax, ay) {
       next = Math.min(MAX, Math.max(MIN, next));
-      if (Math.abs(next - z) < 0.001 && !reset) return;
+      if (Math.abs(next - z) < 0.001) return;
       const f = next / z;
       const r = vp.getBoundingClientRect();
       const cx = ax == null ? vp.clientWidth / 2 : ax - r.left;
       const cy = ay == null ? vp.clientHeight / 2 : ay - r.top;
-      const sl = vp.scrollLeft, st = vp.scrollTop;
+      px = cx - (cx - px) * f;
+      py = cy - (cy - py) * f;
       z = next;
-      apply();
-      if (reset) { vp.scrollLeft = 0; vp.scrollTop = 0; }
-      else { vp.scrollLeft = (sl + cx) * f - cx; vp.scrollTop = (st + cy) * f - cy; }
+      touched = true;
+      clampPan();
+      paint();
     }
+
+    function panBy(dx, dy) { px += dx; py += dy; touched = true; clampPan(); paint(); }
 
     function toggleFull() {
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
@@ -115,44 +131,55 @@
       fullBtn.dataset.icon = on ? 'exit-fullscreen' : 'fullscreen';
       fullBtn.title = on ? 'Exit full screen' : 'Enter full screen';
       fullBtn.setAttribute('aria-label', fullBtn.title);
-      apply();
+      touched = false;
+      layout();
     });
 
     vp.addEventListener('wheel', e => {
       if (!(e.ctrlKey || e.metaKey)) return;
       e.preventDefault();
-      set(z * Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);
+      zoomTo(z * Math.exp(-e.deltaY * 0.01), e.clientX, e.clientY);
     }, { passive: false });
 
     vp.addEventListener('keydown', e => {
       if (e.target !== vp || e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key === '+' || e.key === '=') { e.preventDefault(); set(z * STEP); }
-      else if (e.key === '-' || e.key === '_') { e.preventDefault(); set(z / STEP); }
-      else if (e.key === '0') { e.preventDefault(); set(1, null, null, true); }
+      const k = e.key, big = e.shiftKey ? 200 : 60;
+      if (k === '+' || k === '=') zoomTo(z * STEP);
+      else if (k === '-' || k === '_') zoomTo(z / STEP);
+      else if (k === '0') fit();
+      else if (k === 'ArrowLeft') panBy(big, 0);
+      else if (k === 'ArrowRight') panBy(-big, 0);
+      else if (k === 'ArrowUp') panBy(0, big);
+      else if (k === 'ArrowDown') panBy(0, -big);
+      else return;
+      e.preventDefault();
     });
 
+    // Drag any empty background to pan, as in Figma.
     let drag = null;
     vp.addEventListener('pointerdown', e => {
-      if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('button, a, input, select, summary')) return;
-      if (vp.scrollWidth <= vp.clientWidth + 1 && vp.scrollHeight <= vp.clientHeight + 1) return;
-      drag = { x: e.clientX, y: e.clientY, l: vp.scrollLeft, t: vp.scrollTop };
-      vp.setPointerCapture(e.pointerId);
+      if (e.pointerType === 'touch' || e.button !== 0 || e.target.closest('button, a, input, select, summary')) return;
+      drag = { x: e.clientX, y: e.clientY, px, py };
+      try { vp.setPointerCapture(e.pointerId); } catch (err) { /* synthetic pointers have no capture */ }
       vp.classList.add('is-dragging');
     });
     vp.addEventListener('pointermove', e => {
       if (!drag) return;
-      vp.scrollLeft = drag.l - (e.clientX - drag.x);
-      vp.scrollTop = drag.t - (e.clientY - drag.y);
+      px = drag.px + (e.clientX - drag.x);
+      py = drag.py + (e.clientY - drag.y);
+      touched = true;
+      clampPan();
+      paint();
     });
     const endDrag = () => { drag = null; vp.classList.remove('is-dragging'); };
     vp.addEventListener('pointerup', endDrag);
     vp.addEventListener('pointercancel', endDrag);
 
-    // Re-fit when the frame changes size or a hidden tab becomes visible.
-    window.addEventListener('resize', apply);
-    const ro = new ResizeObserver(apply);
+    // Re-lay out when the frame changes size or a hidden tab becomes visible.
+    window.addEventListener('resize', layout);
+    const ro = new ResizeObserver(layout);
     ro.observe(vp);
-    if (stage) ro.observe(stage);
-    apply();
+    if (kind === 'stage') ro.observe(content);
+    layout();
   }
 })();

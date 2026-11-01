@@ -3,7 +3,7 @@
 const NS='http://www.w3.org/2000/svg';
 const mk=(tag,attrs,text)=>{const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,String(attrs[k]));if(text!=null)e.textContent=text;return e};
 const tw=(s,pad)=>Math.round(s.length*6.7+pad);
-const col={code:'var(--code)',data:'var(--data)',model:'var(--model)',ink:'var(--ink)',stop:'var(--stop)',go:'var(--go)'};
+const col={serve:'var(--serve)',code:'var(--code)',data:'var(--data)',model:'var(--model)',ink:'var(--ink)',stop:'var(--stop)',go:'var(--go)'};
 const icon=(id,x,y,s)=>{const u=mk('use',{href:'#'+id,x,y,width:s,height:s});return u};
 const cubic=(p0,p1,p2,p3)=>({x:(p0.x+3*p1.x+3*p2.x+p3.x)/8,y:(p0.y+3*p1.y+3*p2.y+p3.y)/8});
 function wrap(text,max){const out=[];let line='';text.split(' ').forEach(w=>{if((line+' '+w).trim().length>max&&line){out.push(line);line=w}else line=(line+' '+w).trim()});if(line)out.push(line);return out}
@@ -15,7 +15,9 @@ const actors=[
  {id:'ci',name:'CI',sub:'code tests',icon:'i-ci'},
  {id:'af',name:'Airflow',sub:'runs the jobs',icon:'i-airflow'},
  {id:'ch',name:'ClickHouse',sub:'data',icon:'i-clickhouse'},
- {id:'ml',name:'MLflow',sub:'models',icon:'i-mlflow'}
+ {id:'ml',name:'MLflow',sub:'models',icon:'i-mlflow'},
+ {id:'api',name:'API',sub:'predictions',icon:'i-api'},
+ {id:'app',name:'App',sub:'client',icon:'i-app'}
 ];
 const seq=[
  {phase:'A code change reaches Airflow',lane:'code'},
@@ -43,6 +45,15 @@ const seq=[
  {from:'af',to:'ch',text:'save predictions with model version',lane:'data'},
  {from:'ch',to:'af',text:'true labels arrive later',lane:'data',ret:true},
  {from:'af',to:'af',text:'compute recent score',lane:'data'},
+ {phase:'An app asks for a prediction',lane:'serve'},
+ {from:'app',to:'api',text:'POST /predict',lane:'serve'},
+ {from:'api',to:'ml',text:'which version is champion?',lane:'model'},
+ {from:'ml',to:'api',text:'version 4',lane:'model',ret:true},
+ {from:'api',to:'api',text:'predict with the loaded model',lane:'model'},
+ {from:'api',to:'ch',text:'save request and prediction',lane:'data'},
+ {from:'api',to:'app',text:'label and model_version',lane:'serve',ret:true},
+ {from:'app',to:'api',text:'POST /feedback, later',lane:'serve'},
+ {from:'api',to:'ch',text:'save true label',lane:'data'},
  {phase:'React and inspect',lane:'ink'},
  {from:'af',to:'ml',text:'if score regressed: point alias to previous version',lane:'model'},
  {from:'dev',to:'ch',text:'inspect predictions and labels',lane:'data'},
@@ -51,14 +62,14 @@ const seq=[
 function renderSequence(){
  const svg=document.getElementById('seqSvg');if(!svg)return;
  const Wd=1160,left=20,sp=(Wd-left*2)/actors.length,xs=id=>left+sp*(actors.findIndex(a=>a.id===id)+.5);
- const rows=[];let y=118,n=0;
+ const rows=[];let y=136,n=0;
  seq.forEach(s=>{if(s.phase){rows.push({...s,y});y+=46}else{n++;rows.push({...s,n,y:y+14});y+=s.from===s.to?58:48}});
  const H=y+16;
  svg.setAttribute('viewBox',`0 0 ${Wd} ${H}`);
  const defs=mk('defs');const m=mk('marker',{id:'seqHead',viewBox:'0 0 10 10',refX:8.5,refY:5,markerUnits:'userSpaceOnUse',markerWidth:12,markerHeight:12,orient:'auto'});m.append(mk('path',{d:'M1 1.2L8.6 5L1 8.8'}));defs.append(m);svg.append(defs);
- actors.forEach(a=>{svg.append(mk('line',{x1:xs(a.id),x2:xs(a.id),y1:86,y2:H-8,class:'seq-life'}))});
+ actors.forEach(a=>{svg.append(mk('line',{x1:xs(a.id),x2:xs(a.id),y1:100,y2:H-8,class:'seq-life'}))});
  rows.filter(r=>r.phase).forEach(r=>{const g=mk('g');g.append(mk('rect',{x:6,y:r.y,width:Wd-12,height:30,rx:4,class:'seq-band'}));g.append(mk('rect',{x:6,y:r.y,width:5,height:30,rx:2,fill:col[r.lane]}));g.append(mk('text',{x:24,y:r.y+20,class:'seq-phase',fill:col[r.lane]},r.phase));svg.append(g)});
- actors.forEach(a=>{const x=xs(a.id),w=sp-22,g=mk('g');g.append(mk('rect',{x:x-w/2,y:14,width:w,height:62,rx:6,class:'seq-box'}));g.append(icon(a.icon,x-w/2+12,29,32));g.append(mk('text',{x:x-w/2+54,y:42,class:'seq-name'},a.name));g.append(mk('text',{x:x-w/2+54,y:60,class:'seq-sub'},a.sub));svg.append(g)});
+ actors.forEach(a=>{const x=xs(a.id),w=sp-22,g=mk('g');g.append(mk('rect',{x:x-w/2,y:12,width:w,height:86,rx:6,class:'seq-box'}));g.append(icon(a.icon,x-14,20,28));g.append(mk('text',{x,y:68,class:'seq-name','text-anchor':'middle'},a.name));g.append(mk('text',{x,y:86,class:'seq-sub','text-anchor':'middle'},a.sub));svg.append(g)});
  rows.filter(r=>!r.phase).forEach(r=>{
   const g=mk('g'),c=col[r.lane],x1=xs(r.from),x2=xs(r.to),label=`${r.n}. ${r.text}`;
   if(r.from===r.to){
@@ -81,7 +92,9 @@ const lanes=[
  {id:'git',name:'Git and CI',icon:'i-git'},
  {id:'af',name:'Airflow',icon:'i-airflow'},
  {id:'ch',name:'ClickHouse',icon:'i-clickhouse'},
- {id:'ml',name:'MLflow',icon:'i-mlflow'}
+ {id:'ml',name:'MLflow',icon:'i-mlflow'},
+ {id:'api',name:'Prediction API',icon:'i-api'},
+ {id:'app',name:'App',icon:'i-app'}
 ];
 const nodes=[
  {id:'a',lane:'dev',row:0,text:'Edit training code and tests',type:'code'},
@@ -103,7 +116,12 @@ const nodes=[
  {id:'n',lane:'ch',row:12,text:'Save predictions and later labels',type:'data'},
  {id:'o',lane:'af',row:13,text:'Live score healthy?',type:'data',kind:'gate'},
  {id:'p',lane:'ml',row:14,text:'Point alias to previous version',type:'model'},
- {id:'q',lane:'af',row:14,text:'Keep watching',kind:'end'}
+ {id:'q',lane:'af',row:14,text:'Keep watching',kind:'end'},
+ {id:'s1',lane:'api',row:11,text:'Reload when the champion changes',type:'model'},
+ {id:'s2',lane:'app',row:12,text:'POST /predict with features',type:'serve'},
+ {id:'s3',lane:'api',row:13,text:'Predict with the champion',type:'model'},
+ {id:'s4',lane:'ch',row:14,text:'Save request and prediction',type:'data'},
+ {id:'s5',lane:'app',row:14,text:'Show answer; later POST /feedback',type:'serve'}
 ];
 const links=[
  {from:'a',to:'c',text:'push'},{from:'b',to:'c',text:'push'},{from:'c',to:'d',text:'run tests'},
@@ -113,7 +131,9 @@ const links=[
  {from:'i',to:'j',text:'log run'},{from:'j',to:'k',text:'scores'},
  {from:'k',to:'l',text:'yes: promote',off:18,tone:'go'},{from:'k',to:'x3',text:'no',off:-18,tone:'stop'},
  {from:'l',to:'m',text:'load champion'},{from:'m',to:'n',text:'save scores'},{from:'n',to:'o',text:'true labels'},
- {from:'o',to:'p',text:'regressed: roll back',off:18,tone:'stop'},{from:'o',to:'q',text:'healthy',off:-18,tone:'go'}
+ {from:'o',to:'p',text:'regressed: roll back',off:18,tone:'stop'},{from:'o',to:'q',text:'healthy',off:-18,tone:'go'},
+ {from:'l',to:'s1',text:'alias moved'},{from:'s1',to:'s3',text:'loaded'},{from:'s2',to:'s3',text:'request'},
+ {from:'s3',to:'s4',text:'log',off:-18},{from:'s3',to:'s5',text:'label + version',off:18}
 ];
 function renderSwimlane(){
  const svg=document.getElementById('laneSvg');if(!svg)return;
