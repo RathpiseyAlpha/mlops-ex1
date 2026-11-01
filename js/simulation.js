@@ -18,6 +18,24 @@ const details={
 };
 function selectNode(id){const d=details[id];document.querySelectorAll('[data-node]').forEach(n=>{const active=n.dataset.node===id;n.classList.toggle('selected',active);n.setAttribute('aria-pressed',String(active))});$('detailTitle').textContent=d.title;$('detailDescription').textContent=d.description;$('detailNetwork').replaceChildren(Object.assign(document.createElement('code'),{textContent:d.network}));$('detailList').replaceChildren(...d.items.map(s=>Object.assign(document.createElement('li'),{textContent:s})))}
 document.querySelectorAll('[data-node]').forEach(n=>n.addEventListener('click',()=>selectNode(n.dataset.node)));selectNode('airflow');
+// Drag a box to move it; arrows follow. Mouse and pen drag, Alt with an arrow key nudges the focused box.
+(function(){const net=$('network');let drag=null,raf=0;
+ const shift=id=>nodeShift[id]||(nodeShift[id]={x:0,y:0});
+ const clampShift=id=>{const n=$('node-'+id),s=shift(id);s.x=Math.max(-n.offsetLeft,Math.min(net.offsetWidth-n.offsetWidth-n.offsetLeft,s.x));s.y=Math.max(-n.offsetTop,Math.min(net.offsetHeight-n.offsetHeight-n.offsetTop,s.y))};
+ const place=id=>{const s=shift(id);$('node-'+id).style.transform=s.x||s.y?`translate(${s.x}px,${s.y}px)`:''};
+ const redraw=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;drawEdges()})};
+ document.querySelectorAll('[data-node]').forEach(n=>{const id=n.dataset.node;
+  n.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.button!==0)return;const scale=net.getBoundingClientRect().width/net.offsetWidth||1;drag={id,x:e.clientX,y:e.clientY,sx:shift(id).x,sy:shift(id).y,scale,moved:false};try{n.setPointerCapture(e.pointerId)}catch{}});
+  n.addEventListener('pointermove',e=>{if(!drag||drag.id!==id)return;const dx=(e.clientX-drag.x)/drag.scale,dy=(e.clientY-drag.y)/drag.scale;if(!drag.moved&&Math.hypot(dx,dy)<4)return;drag.moved=true;n.classList.add('is-dragging');const s=shift(id);s.x=drag.sx+dx;s.y=drag.sy+dy;clampShift(id);place(id);redraw()});
+  const end=()=>{if(!drag||drag.id!==id)return;const moved=drag.moved;drag=null;n.classList.remove('is-dragging');if(moved){n.dataset.justDragged='1';setTimeout(()=>delete n.dataset.justDragged,0)}};
+  n.addEventListener('pointerup',end);n.addEventListener('pointercancel',end);
+  n.addEventListener('click',e=>{if(n.dataset.justDragged){e.stopImmediatePropagation();e.preventDefault()}},true);
+  n.addEventListener('keydown',e=>{if(!e.altKey||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const step=e.shiftKey?40:10,s=shift(id);s.x+=e.key==='ArrowRight'?step:e.key==='ArrowLeft'?-step:0;s.y+=e.key==='ArrowDown'?step:e.key==='ArrowUp'?-step:0;clampShift(id);place(id);redraw()});
+ });
+ net.addEventListener('resetlayout',()=>{Object.keys(nodeShift).forEach(id=>{delete nodeShift[id];$('node-'+id).style.transform=''});drawEdges();announce('Box positions reset.')});
+ new ResizeObserver(()=>{Object.keys(nodeShift).forEach(id=>{clampShift(id);place(id)})}).observe(net);
+})();
+
 const storyEpisodes=[
  {key:'code',trigger:'code',score:95,title:'1. ML developer writes training code',hint:'The developer edits project.py and tests, pushes a commit, passes CI, and deploys the exact approved training-code SHA. It can train on the existing labeled snapshot.'},
  {key:'engineer',trigger:'engineer',score:97,title:'2. Data engineer writes ingestion code',hint:'The data engineer edits ingest.py and data-contract tests, pushes a different commit, and deploys the ingestion workflow. That workflow publishes a completed labeled snapshot, triggering training with unchanged training code.'},
@@ -38,6 +56,7 @@ const scenarioInfo={
 };
 let sim,plan=[],index=-1,running=false,timer=null,cycle=0,activeEdges=[],events=[],motionId=null,waiting=false,pendingCycle=false;
 let policy={candidate:95,minimum:90,gain:1};
+const nodeShift={};
 const edges=[
  {id:'push',from:'jupyter',to:'git',type:'code',label:'push commit',d:['top',.5,'left',.5],m:['top',.4,'bottom',.4]},
  {id:'ci',from:'git',to:'ci',type:'code',label:'run tests',d:['right',.3,'left',.7],m:['right',.35,'left',.65]},
@@ -54,8 +73,8 @@ const sideOut={left:[-1,0],right:[1,0],top:[0,-1],bottom:[0,1]};
 function anchorPoint(r,side,f){return side==='left'?{x:r.x,y:r.y+r.h*f}:side==='right'?{x:r.x+r.w,y:r.y+r.h*f}:side==='top'?{x:r.x+r.w*f,y:r.y}:{x:r.x+r.w*f,y:r.y+r.h}}
 function curvePath(s,ss,e,es){const o1=sideOut[ss],o2=sideOut[es];const span=(o,a,b)=>o[0]?Math.abs(b.x-a.x):Math.abs(b.y-a.y);const d1=Math.max(26,span(o1,s,e)*.55),d2=Math.max(26,span(o2,s,e)*.55);return`M ${s.x} ${s.y} C ${s.x+o1[0]*d1} ${s.y+o1[1]*d1}, ${e.x+o2[0]*d2} ${e.y+o2[1]*d2}, ${e.x} ${e.y}`}
 function drawEdges(){if($('simulator').hidden)return;const net=$('network'),box={width:net.offsetWidth,height:net.offsetHeight};if(!box.width)return;const svg=$('networkLines');svg.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);svg.querySelectorAll('.edge-group').forEach(e=>e.remove());const narrow=box.width<560;
- const rects={};['git','ci','jupyter','airflow','clickhouse','mlflow'].forEach(id=>{const n=$('node-'+id);rects[id]={x:n.offsetLeft,y:n.offsetTop,w:n.offsetWidth,h:n.offsetHeight}});
- edges.forEach(edge=>{const spec=narrow?edge.m:edge.d;const s=anchorPoint(rects[edge.from],spec[0],spec[1]);const e0=anchorPoint(rects[edge.to],spec[2],spec[3]);const o=sideOut[spec[2]];const e={x:e0.x+o[0]*3,y:e0.y+o[1]*3};
+ const rects={};['git','ci','jupyter','airflow','clickhouse','mlflow'].forEach(id=>{const n=$('node-'+id);const sh=nodeShift[id]||{x:0,y:0};rects[id]={x:n.offsetLeft+sh.x,y:n.offsetTop+sh.y,w:n.offsetWidth,h:n.offsetHeight}});
+ edges.forEach(edge=>{let spec=narrow?edge.m:edge.d;const was=id=>nodeShift[id]&&(nodeShift[id].x||nodeShift[id].y);if(was(edge.from)||was(edge.to)){const a=rects[edge.from],b=rects[edge.to],dx=b.x+b.w/2-(a.x+a.w/2),dy=b.y+b.h/2-(a.y+a.h/2);spec=Math.abs(dx)>=Math.abs(dy)?[dx>0?'right':'left',spec[1],dx>0?'left':'right',spec[3]]:[dy>0?'bottom':'top',spec[1],dy>0?'top':'bottom',spec[3]]}const s=anchorPoint(rects[edge.from],spec[0],spec[1]);const e0=anchorPoint(rects[edge.to],spec[2],spec[3]);const o=sideOut[spec[2]];const e={x:e0.x+o[0]*3,y:e0.y+o[1]*3};
   const g=svgElement('g',{class:'edge-group','data-edge-group':edge.id,'data-lane':edge.type});const p=svgElement('path',{id:'edge-'+edge.id,d:curvePath(s,spec[0],e,spec[2]),'marker-end':'url(#netArrow)'});g.append(p);svg.append(g);
   if(edge.label){const mid=p.getPointAtLength(p.getTotalLength()/2);const words=edge.label.split(' ');let lines=[edge.label];if(edge.label.length>12&&words.length>1){let best=1,gap=1e9;for(let i=1;i<words.length;i++){const d=Math.abs(words.slice(0,i).join(' ').length-words.slice(i).join(' ').length);if(d<gap){gap=d;best=i}}lines=[words.slice(0,best).join(' '),words.slice(best).join(' ')]}const t=svgElement('text',{x:mid.x,y:mid.y+4-(lines.length-1)*7,'text-anchor':'middle',class:'edge-caption'});lines.forEach((ln,i)=>{const s=svgElement('tspan',{x:mid.x,dy:i?14:0});s.textContent=ln;t.append(s)});g.append(t);const bb=t.getBBox();const lab={x:bb.x-8,y:bb.y-3,w:bb.width+16,h:bb.height+6};const hit=Object.values(rects).some(r=>lab.x<r.x+r.w+2&&lab.x+lab.w>r.x-2&&lab.y<r.y+r.h+2&&lab.y+lab.h>r.y-2);if(hit)t.remove();else{g.insertBefore(svgElement('rect',{x:lab.x,y:lab.y,width:lab.w,height:lab.h,rx:5,class:'edge-label-bg'}),t)}}
   g.append(svgElement('circle',{r:5,'data-particle':edge.id}))});paintEdges()}

@@ -37,6 +37,8 @@ js/diagrams.js      sequence and swimlane diagrams, drawn from data
 js/zoom.js          zoom, pan and full screen for the network and both diagrams
 ```
 
-Zoom: use the minus, plus and Fit buttons, or hold Ctrl and scroll. Drag to move around when zoomed in.
+Zoom: use the minus, plus and Fit buttons, or hold Ctrl and scroll. The frame keeps its size; the content scrolls inside it. Drag empty space to move around when zoomed in.
+
+Boxes: drag any server box to rearrange the network and its arrows follow. With a box focused, Alt and an arrow key nudges it (add Shift for bigger steps). Reset layout puts them back. Dragging uses a mouse or pen; touch screens can tap boxes but not move them.
 
 The tech-stack icons are simplified redraws on a shared 32px grid, not the official logos.
