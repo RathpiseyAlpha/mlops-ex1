@@ -45,7 +45,7 @@ input[type=range]{width:100%;margin:var(--space-2) 0 0;accent-color:var(--ink)}
 .arrow-key span{display:flex;align-items:center;gap:var(--space-2)}
 .arrow-key svg{width:48px;height:14px;overflow:visible}
 .arrow-key path{fill:none;stroke-width:2.6;stroke-linecap:round}
-.network{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:". git ci" "jupyter clickhouse airflow" "jupyter mlflow airflow";column-gap:clamp(96px,12vw,200px);row-gap:clamp(84px,8vw,130px);margin:var(--space-7) var(--space-6) var(--space-6)}
+.network{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-areas:". git ci" "jupyter clickhouse airflow" "jupyter mlflow airflow";column-gap:clamp(80px,7.5vw,150px);row-gap:clamp(84px,8vw,130px)}
 .net-key{display:none}
 #node-git{grid-area:git}#node-ci{grid-area:ci}#node-clickhouse{grid-area:clickhouse}#node-mlflow{grid-area:mlflow}
 #node-jupyter{grid-area:jupyter;align-self:center}#node-airflow{grid-area:airflow;align-self:center}
@@ -143,3 +143,50 @@ input[type=range]{width:100%;margin:var(--space-2) 0 0;accent-color:var(--ink)}
 .events li.empty{display:block}
 .events time{font:13px var(--mono);color:var(--muted);padding-top:1px}
 .events .bad{color:var(--stop)}.events .warn{color:var(--hold)}
+
+/* diagram on the left, step explanation on the right: nothing to scroll between them */
+.sim-stage{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:var(--space-5);align-items:start}
+.sim-side{display:grid;gap:var(--space-4);min-width:0}
+.side-title{font:600 16px var(--display);margin:0;padding:var(--space-4) var(--space-5) 0}
+.step-top{flex-wrap:wrap;row-gap:var(--space-1)}
+.side-gates .feedback-loop{margin:var(--space-3) var(--space-5) var(--space-4)}
+@media(min-width:1101px){
+ .sim-side{position:sticky;top:var(--space-4)}
+ .step-copy h3{font-size:22px}
+ .step-copy p{font-size:16px}
+ .phase-row{gap:var(--space-3);padding:var(--space-4) var(--space-5) 0}
+ .step-copy{padding:var(--space-3) var(--space-5) var(--space-5)}
+ .side-gates .gates{grid-template-columns:1fr;border-top:0;padding:var(--space-3) var(--space-5) 0}
+ .side-gates .gates li{grid-template-columns:auto 1fr;column-gap:var(--space-3);align-items:center;padding-bottom:var(--space-3);justify-items:start}
+ .side-gates .gates .lamp{grid-row:1/3;margin-bottom:0}
+ .side-gates .gates li::after{left:14px;right:auto;top:36px;bottom:2px;width:3px;height:auto}
+ .side-gates .gate-name,.side-gates .gate-note{margin-right:0}
+ .side-gates .status-bar>div{padding:var(--space-3) var(--space-3)}
+ .side-gates .status-bar strong{font-size:13px}
+}
+
+/* the story bar already says what the scenario is, so the toolbar hint would repeat it */
+.sim-layout:has(#storyBar:not([hidden])) .scenario-hint{display:none}
+
+/* compact header and toolbar on wide screens so the diagram and its explanation share the first screen */
+@media(min-width:1101px){
+ .intro{margin:14px 0 10px;max-width:none}
+ .intro h1{font-size:32px;margin-bottom:6px}
+ .intro p{max-width:none;font-size:16.5px}
+ .notice{margin-bottom:10px}
+ .tabs{margin-bottom:14px}
+ .sim-layout{gap:var(--space-4)}
+ .controls .field{max-width:280px}
+ .controls{padding:var(--space-3) var(--space-5)}
+ .policy-box{flex:0 1 auto;border-top:0;padding:0 0 10px;position:relative;align-self:flex-end}
+ .policy-box .policy{position:absolute;top:100%;left:0;z-index:6;width:min(720px,80vw);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-lg);padding:var(--space-4);box-shadow:0 12px 32px rgba(0,0,0,.18)}
+ .story-bar p{display:none}
+ .story-heading h2{font-size:20px}
+ .story-episodes{margin-top:8px}
+ .story-episodes li{padding-top:5px;font-size:13.5px}
+}
+
+@media(min-width:1101px) and (max-width:1380px){
+ .node h3{font-size:19px}
+ .node{padding:var(--space-3) var(--space-3) var(--space-3) var(--space-5)}
+}

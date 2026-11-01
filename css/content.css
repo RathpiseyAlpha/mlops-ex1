@@ -101,7 +101,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel);border:1
 .diagram-key svg{width:48px;height:14px;overflow:visible}
 .diagram-key path,.diagram-key rect,.diagram-key polygon{fill:none;stroke-width:2.4;stroke-linecap:round}
 .diagram-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-lg);background:var(--panel)}
-.diagram-scroll svg{display:block;width:100%;min-width:980px;height:auto;max-width:1400px;margin:auto}
+.diagram-scroll svg{display:block;width:100%;height:auto}
 .alt-text{margin-top:var(--space-4);font:14.5px var(--display);color:var(--muted)}
 .alt-text summary{font-weight:600}
 .alt-text ol{font:15px/1.5 var(--serif);max-width:80ch}

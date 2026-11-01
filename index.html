@@ -12,6 +12,7 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/simulator.css">
 <link rel="stylesheet" href="css/content.css">
+<link rel="stylesheet" href="css/zoom.css">
 <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
@@ -43,8 +44,10 @@
 </aside>
 <div class="main-stack">
 <div class="story-bar span-all" id="storyBar" aria-label="Looping story progress"><div class="story-heading"><h2 id="storyTitle">1. ML developer writes training code</h2><span class="tag" id="storyRound">Replay 1, episode 1 of 4</span></div><ol class="story-episodes"><li data-episode="0">Developer pushes training code</li><li data-episode="1">Data engineer pushes ingestion code</li><li data-episode="2">New data arrives, no push</li><li data-episode="3">Regression found, rolled back</li></ol><p id="storyHint">The story plays automatically. Pause or use Next step to inspect any action.</p></div>
-<section class="panel span-all" aria-label="Animated server network">
+<div class="sim-stage span-all">
+<section class="panel network-panel" aria-label="Animated server network">
 <div class="panel-head"><h2>The server network</h2><span class="tag" id="runState">Ready</span></div><div class="network-note">Example private network 10.0.0.0/24. Select a box to see what it does. Text on each arrow says what travels along it.</div><div class="arrow-key" aria-label="Arrow styles"><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--code)"/></svg>Code and deployment: solid</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--data)" stroke-dasharray="9 7"/></svg>Data and training: dashed</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 10C16 10 30 4 46 4" stroke="var(--model)" stroke-dasharray="1 7"/></svg>Models and evaluation: dotted</span></div>
+<div class="zoom-viewport" data-zoomable="stage" data-zoom-label="Network diagram"><div class="zoom-sizer"><div class="zoom-stage">
 <div class="network" id="network">
 <svg class="net-lines" id="networkLines" aria-hidden="true"><defs><marker id="netArrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="13" markerHeight="13" orient="auto"><path d="M1 1.2L8.6 5L1 8.8"/></marker></defs></svg>
 <button class="node" data-node="git" data-lane="code" id="node-git" aria-pressed="false"><div class="node-type">Shared code source</div><div class="node-head"><h3>Git repository</h3><span class="node-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><use href="#i-git"/></svg></span></div><div class="endpoint">git.example.com:443</div><div class="node-role">Commits, branches and approved code versions</div><span class="node-state" id="state-git">main at a14c7d2</span></button>
@@ -54,6 +57,13 @@
 <button class="node" data-node="clickhouse" data-lane="data" id="node-clickhouse" aria-pressed="false"><div class="node-type">Server C, data</div><div class="node-head"><h3>ClickHouse</h3><span class="node-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><use href="#i-clickhouse"/></svg></span></div><div class="endpoint">10.0.0.20:8123</div><div class="node-role">Labeled snapshots, predictions, feedback</div><span class="node-state" id="state-clickhouse">Latest snapshot iris-v12</span></button>
 <button class="node" data-node="mlflow" data-lane="model" id="node-mlflow" aria-pressed="false"><div class="node-type">Server D, model history</div><div class="node-head"><h3>MLflow</h3><span class="node-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><use href="#i-mlflow"/></svg></span></div><div class="endpoint">10.0.0.30:5000</div><div class="node-role">Runs, metrics, versions, champion alias</div><span class="node-state" id="state-mlflow">Champion is v3</span></button>
 </div>
+</div></div></div>
+<div class="domains" aria-label="Browser domain names"><span>airflow.example.com:443</span><span>jupyter.example.com:443</span><span>clickhouse.example.com:443</span><span>mlflow.example.com:443</span></div>
+
+</section>
+<div class="sim-side">
+<section class="panel" aria-label="Current workflow step"><div class="phase-row"><span class="phase" data-phase="code">Code and deployment</span><span class="phase" data-phase="data">Data readiness</span><span class="phase" data-phase="model">Training and model tests</span><span class="phase" data-phase="release">Promotion and monitoring</span></div><div class="step-copy"><div class="step-top"><h3 id="stepTitle">Ready for a new labeled batch</h3><span class="step-counter" id="stepCounter">0 of 0 steps</span></div><p id="stepDescription">Run the scenario or advance one step at a time. A new data event can retrain the deployed code without another Git commit.</p><div class="progress" role="progressbar" aria-label="Scenario progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div id="progressFill"></div></div><div class="result" id="result" hidden></div><div class="decision-box" id="policySummary">Gate: score at least 90%, gain at least 1 percentage point, and the prediction smoke test passes.</div></div></section>
+<section class="panel side-gates" aria-label="Test gates and current state"><h3 class="side-title">Test gates</h3>
 <ol class="gates" id="gates" aria-label="Test gates for this change">
 <li data-gate="ci" data-state="idle"><span class="lamp" aria-hidden="true"></span><span class="gate-name">Code tests</span><span class="gate-note">Not reached</span></li>
 <li data-gate="data" data-state="idle"><span class="lamp" aria-hidden="true"></span><span class="gate-name">Data checks</span><span class="gate-note">Not reached</span></li>
@@ -61,10 +71,11 @@
 <li data-gate="promote" data-state="idle"><span class="lamp" aria-hidden="true"></span><span class="gate-name">Promotion policy</span><span class="gate-note">Not reached</span></li>
 <li data-gate="watch" data-state="idle"><span class="lamp" aria-hidden="true"></span><span class="gate-name">Live monitoring</span><span class="gate-note">Not reached</span></li>
 </ol>
-<div class="domains" aria-label="Browser domain names"><span>airflow.example.com:443</span><span>jupyter.example.com:443</span><span>clickhouse.example.com:443</span><span>mlflow.example.com:443</span></div>
-<div class="feedback-loop" id="feedbackLoop"><span class="loop-dot" aria-hidden="true"></span><span>Monitor, then wait for code or eligible data, then test, train, decide and monitor again.</span></div><div class="status-bar"><div><small>Training code SHA</small><strong id="deployedValue">a14c7d2</strong><small id="ingestionValue">ingestion: d02a610</small></div><div><small>Current champion</small><strong id="championValue">v3, 92%</strong></div><div><small>Candidate decision</small><strong id="decisionValue">Not evaluated</strong></div></div>
+<div class="feedback-loop" id="feedbackLoop"><span class="loop-dot" aria-hidden="true"></span><span>Monitor, then wait for code or eligible data, then test, train, decide and monitor again.</span></div>
+<div class="status-bar"><div><small>Training code SHA</small><strong id="deployedValue">a14c7d2</strong><small id="ingestionValue">ingestion: d02a610</small></div><div><small>Current champion</small><strong id="championValue">v3, 92%</strong></div><div><small>Candidate decision</small><strong id="decisionValue">Not evaluated</strong></div></div>
 </section>
-<section class="panel span-all" aria-label="Current workflow step"><div class="phase-row"><span class="phase" data-phase="code">Code and deployment</span><span class="phase" data-phase="data">Data readiness</span><span class="phase" data-phase="model">Training and model tests</span><span class="phase" data-phase="release">Promotion and monitoring</span></div><div class="step-copy"><div class="step-top"><h3 id="stepTitle">Ready for a new labeled batch</h3><span class="step-counter" id="stepCounter">0 of 0 steps</span></div><p id="stepDescription">Run the scenario or advance one step at a time. A new data event can retrain the deployed code without another Git commit.</p><div class="progress" role="progressbar" aria-label="Scenario progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack"><div id="progressFill"></div></div><div class="result" id="result" hidden></div><div class="decision-box" id="policySummary">Gate: score at least 90%, gain at least 1 percentage point, and the prediction smoke test passes.</div></div></section>
+</div>
+</div>
 <section class="panel detail" id="nodeDetail" aria-label="Selected server details"><div><h3 id="detailTitle">Airflow: the repeatable execution environment</h3><p id="detailDescription"></p></div><div><h3>Network and files</h3><div id="detailNetwork"></div><ul id="detailList"></ul></div></section>
 <section class="panel event-panel"><h3>Run trace <span class="sub">newest first</span></h3><ol class="events" id="events"><li class="empty">No events yet. Select a scenario and press Run.</li></ol></section>
 </div></div>
@@ -94,13 +105,13 @@
 <section id="sequence" role="tabpanel" aria-labelledby="tab-sequence" hidden>
 <div class="diagram-intro"><h2>Who sends what to whom, in order.</h2><p>Read top to bottom. Each arrow is one message, numbered in the order it happens during a typical cycle. Orange is code, blue is data, purple is models.</p></div>
 <div class="diagram-key"><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 7H46" stroke="var(--code)"/></svg>Code</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 7H46" stroke="var(--data)"/></svg>Data</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 7H46" stroke="var(--model)"/></svg>Models</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 7H46" stroke="var(--muted)" stroke-dasharray="7 6"/></svg>Dashed means a reply</span></div>
-<div class="diagram-scroll"><svg id="seqSvg" role="img" aria-label="Sequence diagram of one continuous ML cycle. The same steps are listed below."></svg></div>
+<div class="diagram-scroll zoom-viewport" data-zoomable="svg" data-zoom-label="Sequence diagram"><svg id="seqSvg" role="img" aria-label="Sequence diagram of one continuous ML cycle. The same steps are listed below."></svg></div>
 <details class="alt-text"><summary>Read the sequence as a list</summary><ol id="seqList"></ol></details>
 </section>
 <section id="swimlane" role="tabpanel" aria-labelledby="tab-swimlane" hidden>
 <div class="diagram-intro"><h2>Who does each step, and where it can stop.</h2><p>Each column is one actor. Time runs downward. Hexagons are decisions: a failed test, a failed data check or a weaker model ends the run without changing what is deployed.</p></div>
 <div class="diagram-key"><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 7H46" stroke="var(--code)"/></svg>Code step</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 7H46" stroke="var(--data)"/></svg>Data step</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><path d="M2 7H46" stroke="var(--model)"/></svg>Model step</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><polygon points="6,1 42,1 47,7 42,13 6,13 1,7" stroke="var(--ink)"/></svg>Decision</span><span><svg viewBox="0 0 48 14" aria-hidden="true"><rect x="2" y="1" width="44" height="12" rx="6" stroke="var(--muted)" stroke-dasharray="5 4"/></svg>Stop</span></div>
-<div class="diagram-scroll"><svg id="laneSvg" role="img" aria-label="Swimlane diagram with six lanes. The same steps are listed below."></svg></div>
+<div class="diagram-scroll zoom-viewport" data-zoomable="svg" data-zoom-label="Swimlane diagram"><svg id="laneSvg" role="img" aria-label="Swimlane diagram with six lanes. The same steps are listed below."></svg></div>
 <details class="alt-text"><summary>Read the swimlane as a list</summary><ol id="laneList"></ol></details>
 </section>
 <section id="testing" role="tabpanel" aria-labelledby="tab-testing" hidden>
@@ -193,5 +204,6 @@ model = mlflow.sklearn.load_model(
 </div>
 <script src="js/simulation.js"></script>
 <script src="js/diagrams.js"></script>
+<script src="js/zoom.js"></script>
 </body>
 </html>
