@@ -13,8 +13,17 @@
   function setup(vp) {
     const kind = vp.dataset.zoomable;
     const label = vp.dataset.zoomLabel || 'Diagram';
-    const content = kind === 'svg' ? vp.querySelector(':scope > svg') : vp.querySelector('.zoom-stage');
+    const content = kind === 'svg' ? vp.querySelector(':scope > svg:not(.zoom-head-svg)') : vp.querySelector('.zoom-stage');
     content.classList.add('zoom-content');
+    // An optional header SVG stays pinned to the top: it follows horizontal pan and zoom, but not vertical pan.
+    const head = kind === 'svg' ? vp.querySelector(':scope > svg.zoom-head-svg') : null;
+    let headWrap = null, headH = 0;
+    if (head) {
+      headWrap = document.createElement('div');
+      headWrap.className = 'zoom-head-wrap';
+      vp.insertBefore(headWrap, head);
+      headWrap.append(head);
+    }
     let z = 1, px = 0, py = 0, fitZ = 1, natW = 0, natH = 0, touched = false;
 
     const frame = document.createElement('div');
@@ -66,6 +75,10 @@
 
     function paint() {
       content.style.transform = 'translate(' + Math.round(px) + 'px,' + Math.round(py) + 'px) scale(' + z + ')';
+      if (head) {
+        head.style.transform = 'translate(' + Math.round(px) + 'px,' + TOP + 'px) scale(' + z + ')';
+        headWrap.style.height = Math.round(TOP + headH * z) + 'px';
+      }
       level.textContent = Math.round(z * 100) + '%';
     }
 
@@ -73,7 +86,8 @@
     function clampPan() {
       const w = vp.clientWidth, h = vp.clientHeight;
       px = Math.min(w - KEEP, Math.max(KEEP - natW * z, px));
-      py = Math.min(h - KEEP, Math.max(KEEP - natH * z, py));
+      const maxY = head ? TOP + headH * z : h - KEEP;
+      py = Math.min(maxY, Math.max(KEEP - natH * z, py));
     }
 
     function layout() {
@@ -85,7 +99,13 @@
         const vb = content.viewBox.baseVal;
         natH = vb && vb.width ? natW * vb.height / vb.width : 600;
         content.style.width = natW + 'px';
-        frameH = isFull() ? window.innerHeight : Math.max(360, Math.min(natH + TOP, window.innerHeight * 0.8));
+        headH = 0;
+        if (head) {
+          const hv = head.viewBox.baseVal;
+          headH = hv && hv.width ? natW * hv.height / hv.width : 0;
+          head.style.width = natW + 'px';
+        }
+        frameH = isFull() ? window.innerHeight : Math.max(360, Math.min(TOP + headH + natH, window.innerHeight * 0.8));
         fitZ = 1;
       } else {
         content.style.width = w + 'px';
@@ -96,7 +116,7 @@
       }
       const h = Math.round(frameH) + 'px';
       if (vp.style.height !== h) vp.style.height = h;
-      if (!touched) { z = fitZ; px = (w - natW * z) / 2; py = TOP; }
+      if (!touched) { z = fitZ; px = (w - natW * z) / 2; py = head ? TOP + headH * z : TOP; }
       clampPan();
       vp.classList.add('is-ready');
       paint();
@@ -176,8 +196,15 @@
     vp.addEventListener('pointercancel', endDrag);
 
     // Re-lay out when the frame changes size or a hidden tab becomes visible.
-    window.addEventListener('resize', layout);
-    const ro = new ResizeObserver(layout);
+    // Run on the next frame so a size change made by layout itself cannot loop inside the observer.
+    let queued = false;
+    const relayout = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; layout(); });
+    };
+    window.addEventListener('resize', relayout);
+    const ro = new ResizeObserver(relayout);
     ro.observe(vp);
     if (kind === 'stage') ro.observe(content);
     layout();

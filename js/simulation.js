@@ -61,16 +61,16 @@ let policy={candidate:95,minimum:90,gain:1};
 const nodeShift={};
 const edges=[
  {id:'push',from:'jupyter',to:'git',type:'code',label:'push commit',d:['top',.5,'left',.5],m:['top',.4,'bottom',.4]},
- {id:'ci',from:'git',to:'ci',type:'code',label:'run tests',d:['right',.3,'left',.7],m:['right',.35,'left',.65]},
+ {id:'ci',from:'git',to:'ci',type:'code',label:'run tests, report',both:true,d:['right',.3,'left',.7],m:['right',.35,'left',.65]},
  {id:'deploy',from:'ci',to:'airflow',type:'code',label:'approved SHA',d:['bottom',.65,'top',.65],m:['bottom',.6,'top',.6]},
  {id:'git-fetch',from:'git',to:'airflow',type:'code',label:'fetch approved code',d:['right',.85,'top',.2],m:['right',.85,'top',.2]},
- {id:'data',from:'airflow',to:'clickhouse',type:'data',label:'read, write rows',d:['left',.3,'right',.5],m:['left',.85,'right',.4]},
- {id:'track',from:'airflow',to:'mlflow',type:'model',label:'log, load models',d:['left',.7,'right',.5],m:['bottom',.7,'top',.7]},
- {id:'explore',from:'jupyter',to:'clickhouse',type:'data',label:'inspect data',d:['right',.3,'left',.5],m:['bottom',.5,'top',.5]},
- {id:'inspect',from:'jupyter',to:'mlflow',type:'model',label:'compare runs',d:['right',.7,'left',.5],m:['bottom',.8,'left',.5]},
+ {id:'data',from:'airflow',to:'clickhouse',type:'data',label:'read, write rows',both:true,d:['left',.3,'right',.5],m:['left',.85,'right',.4]},
+ {id:'track',from:'airflow',to:'mlflow',type:'model',label:'log, load models',both:true,d:['left',.7,'right',.5],m:['bottom',.7,'top',.7]},
+ {id:'explore',from:'clickhouse',to:'jupyter',type:'data',label:'inspect data',d:['left',.5,'right',.3],m:['top',.5,'bottom',.5]},
+ {id:'inspect',from:'mlflow',to:'jupyter',type:'model',label:'compare runs',d:['left',.5,'right',.7],m:['left',.5,'bottom',.8]},
  {id:'app-req',from:'app',to:'api',type:'serve',label:'POST /predict',d:['left',.3,'right',.3],m:['left',.35,'right',.35]},
  {id:'api-resp',from:'api',to:'app',type:'serve',label:'label + version',d:['right',.7,'left',.7],m:['right',.7,'left',.7]},
- {id:'api-ml',from:'api',to:'mlflow',type:'model',label:'load champion',d:['top',.4,'bottom',.4],m:['top',.4,'bottom',.4]},
+ {id:'api-ml',from:'mlflow',to:'api',type:'model',label:'load champion',d:['bottom',.4,'top',.4],m:['bottom',.4,'top',.4]},
  {id:'api-ch',from:'api',to:'clickhouse',type:'data',label:'log predictions',d:['left',.3,'left',.85,70],m:['left',.25,'bottom',.8]}
 ];
 const svgNS='http://www.w3.org/2000/svg';
@@ -80,8 +80,8 @@ function anchorPoint(r,side,f){return side==='left'?{x:r.x,y:r.y+r.h*f}:side==='
 function curvePath(s,ss,e,es,minD=26){const o1=sideOut[ss],o2=sideOut[es];const span=(o,a,b)=>o[0]?Math.abs(b.x-a.x):Math.abs(b.y-a.y);const d1=Math.max(minD,span(o1,s,e)*.55),d2=Math.max(minD,span(o2,s,e)*.55);return`M ${s.x} ${s.y} C ${s.x+o1[0]*d1} ${s.y+o1[1]*d1}, ${e.x+o2[0]*d2} ${e.y+o2[1]*d2}, ${e.x} ${e.y}`}
 function drawEdges(){if($('simulator').hidden)return;const net=$('network'),box={width:net.offsetWidth,height:net.offsetHeight};if(!box.width)return;const svg=$('networkLines');svg.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);svg.querySelectorAll('.edge-group').forEach(e=>e.remove());const narrow=box.width<560;
  const rects={};['git','ci','jupyter','airflow','clickhouse','mlflow','api','app'].forEach(id=>{const n=$('node-'+id);const sh=nodeShift[id]||{x:0,y:0};rects[id]={x:n.offsetLeft+sh.x,y:n.offsetTop+sh.y,w:n.offsetWidth,h:n.offsetHeight}});
- edges.forEach(edge=>{let spec=narrow?edge.m:edge.d;const was=id=>nodeShift[id]&&(nodeShift[id].x||nodeShift[id].y);if(was(edge.from)||was(edge.to)){const a=rects[edge.from],b=rects[edge.to],dx=b.x+b.w/2-(a.x+a.w/2),dy=b.y+b.h/2-(a.y+a.h/2);spec=Math.abs(dx)>=Math.abs(dy)?[dx>0?'right':'left',spec[1],dx>0?'left':'right',spec[3]]:[dy>0?'bottom':'top',spec[1],dy>0?'top':'bottom',spec[3]]}const s=anchorPoint(rects[edge.from],spec[0],spec[1]);const e0=anchorPoint(rects[edge.to],spec[2],spec[3]);const o=sideOut[spec[2]];const e={x:e0.x+o[0]*3,y:e0.y+o[1]*3};
-  const g=svgElement('g',{class:'edge-group','data-edge-group':edge.id,'data-lane':edge.type});const p=svgElement('path',{id:'edge-'+edge.id,d:curvePath(s,spec[0],e,spec[2],spec[4]),'marker-end':'url(#netArrow)'});g.append(p);svg.append(g);
+ edges.forEach(edge=>{let spec=narrow?edge.m:edge.d;const was=id=>nodeShift[id]&&(nodeShift[id].x||nodeShift[id].y);if(was(edge.from)||was(edge.to)){const a=rects[edge.from],b=rects[edge.to],dx=b.x+b.w/2-(a.x+a.w/2),dy=b.y+b.h/2-(a.y+a.h/2);spec=Math.abs(dx)>=Math.abs(dy)?[dx>0?'right':'left',spec[1],dx>0?'left':'right',spec[3]]:[dy>0?'bottom':'top',spec[1],dy>0?'top':'bottom',spec[3]]}const s=anchorPoint(rects[edge.from],spec[0],spec[1]);if(edge.both){const o0=sideOut[spec[0]];s.x+=o0[0]*3;s.y+=o0[1]*3}const e0=anchorPoint(rects[edge.to],spec[2],spec[3]);const o=sideOut[spec[2]];const e={x:e0.x+o[0]*3,y:e0.y+o[1]*3};
+  const g=svgElement('g',{class:'edge-group','data-edge-group':edge.id,'data-lane':edge.type});const p=svgElement('path',{id:'edge-'+edge.id,d:curvePath(s,spec[0],e,spec[2],spec[4]),'marker-end':'url(#netArrow)',...(edge.both?{'marker-start':'url(#netArrow)'}:{})});g.append(p);svg.append(g);
   if(edge.label){const mid=p.getPointAtLength(p.getTotalLength()/2);const words=edge.label.split(' ');let lines=[edge.label];if(edge.label.length>12&&words.length>1){let best=1,gap=1e9;for(let i=1;i<words.length;i++){const d=Math.abs(words.slice(0,i).join(' ').length-words.slice(i).join(' ').length);if(d<gap){gap=d;best=i}}lines=[words.slice(0,best).join(' '),words.slice(best).join(' ')]}const t=svgElement('text',{x:mid.x,y:mid.y+4-(lines.length-1)*7,'text-anchor':'middle',class:'edge-caption'});lines.forEach((ln,i)=>{const s=svgElement('tspan',{x:mid.x,dy:i?14:0});s.textContent=ln;t.append(s)});g.append(t);const bb=t.getBBox();const lab={x:bb.x-8,y:bb.y-3,w:bb.width+16,h:bb.height+6};const hit=Object.values(rects).some(r=>lab.x<r.x+r.w+2&&lab.x+lab.w>r.x-2&&lab.y<r.y+r.h+2&&lab.y+lab.h>r.y-2);if(hit)t.remove();else{g.insertBefore(svgElement('rect',{x:lab.x,y:lab.y,width:lab.w,height:lab.h,rx:5,class:'edge-label-bg'}),t)}}
   g.append(svgElement('circle',{r:5,'data-particle':edge.id}))});paintEdges()}
 function paintEdges(){edges.forEach(e=>{const p=$('edge-'+e.id),circle=document.querySelector(`[data-particle="${e.id}"]`),g=document.querySelector(`[data-edge-group="${e.id}"]`);if(!p)return;const on=activeEdges.includes(e.id);p.classList.toggle('active',on);g.classList.toggle('is-active',on);g.style.setProperty('--flow-color',`var(--${e.type})`);circle.classList.toggle('on',on&&running)})}

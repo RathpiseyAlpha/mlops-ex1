@@ -60,16 +60,16 @@ const seq=[
  {from:'dev',to:'ml',text:'compare runs and versions',lane:'model'}
 ];
 function renderSequence(){
- const svg=document.getElementById('seqSvg');if(!svg)return;
+ const svg=document.getElementById('seqSvg'),head=document.getElementById('seqHead');if(!svg||!head)return;
  const Wd=1160,left=20,sp=(Wd-left*2)/actors.length,xs=id=>left+sp*(actors.findIndex(a=>a.id===id)+.5);
- const rows=[];let y=136,n=0;
+ const rows=[];let y=22,n=0;
  seq.forEach(s=>{if(s.phase){rows.push({...s,y});y+=46}else{n++;rows.push({...s,n,y:y+14});y+=s.from===s.to?58:48}});
  const H=y+16;
- svg.setAttribute('viewBox',`0 0 ${Wd} ${H}`);
+ svg.setAttribute('viewBox',`0 0 ${Wd} ${H}`);head.setAttribute('viewBox',`0 0 ${Wd} 100`);
  const defs=mk('defs');const m=mk('marker',{id:'seqHead',viewBox:'0 0 10 10',refX:8.5,refY:5,markerUnits:'userSpaceOnUse',markerWidth:12,markerHeight:12,orient:'auto'});m.append(mk('path',{d:'M1 1.2L8.6 5L1 8.8'}));defs.append(m);svg.append(defs);
- actors.forEach(a=>{svg.append(mk('line',{x1:xs(a.id),x2:xs(a.id),y1:100,y2:H-8,class:'seq-life'}))});
+ actors.forEach(a=>{svg.append(mk('line',{x1:xs(a.id),x2:xs(a.id),y1:0,y2:H-8,class:'seq-life'}))});
  rows.filter(r=>r.phase).forEach(r=>{const g=mk('g');g.append(mk('rect',{x:6,y:r.y,width:Wd-12,height:30,rx:4,class:'seq-band'}));g.append(mk('rect',{x:6,y:r.y,width:5,height:30,rx:2,fill:col[r.lane]}));g.append(mk('text',{x:24,y:r.y+20,class:'seq-phase',fill:col[r.lane]},r.phase));svg.append(g)});
- actors.forEach(a=>{const x=xs(a.id),w=sp-22,g=mk('g');g.append(mk('rect',{x:x-w/2,y:12,width:w,height:86,rx:6,class:'seq-box'}));g.append(icon(a.icon,x-14,20,28));g.append(mk('text',{x,y:68,class:'seq-name','text-anchor':'middle'},a.name));g.append(mk('text',{x,y:86,class:'seq-sub','text-anchor':'middle'},a.sub));svg.append(g)});
+ actors.forEach(a=>{const x=xs(a.id),w=sp-22,g=mk('g');g.append(mk('rect',{x:x-w/2,y:12,width:w,height:86,rx:6,class:'seq-box'}));g.append(icon(a.icon,x-14,20,28));g.append(mk('text',{x,y:68,class:'seq-name','text-anchor':'middle'},a.name));g.append(mk('text',{x,y:86,class:'seq-sub','text-anchor':'middle'},a.sub));head.append(g)});
  rows.filter(r=>!r.phase).forEach(r=>{
   const g=mk('g'),c=col[r.lane],x1=xs(r.from),x2=xs(r.to),label=`${r.n}. ${r.text}`;
   if(r.from===r.to){
@@ -136,15 +136,15 @@ const links=[
  {from:'s3',to:'s4',text:'log',off:-18},{from:'s3',to:'s5',text:'label + version',off:18}
 ];
 function renderSwimlane(){
- const svg=document.getElementById('laneSvg');if(!svg)return;
- const LW=186,HH=78,Y0=HH+22,RP=106,NW=150,NH=58,rows=15,Wd=LW*lanes.length,H=Y0+RP*rows;
- svg.setAttribute('viewBox',`0 0 ${Wd} ${H}`);
+ const svg=document.getElementById('laneSvg'),head=document.getElementById('laneHead');if(!svg||!head)return;
+ const LW=186,HH=78,Y0=22,RP=106,NW=150,NH=58,rows=15,Wd=LW*lanes.length,H=Y0+RP*rows;
+ svg.setAttribute('viewBox',`0 0 ${Wd} ${H}`);head.setAttribute('viewBox',`0 0 ${Wd} ${HH}`);
  const laneIdx=id=>lanes.findIndex(l=>l.id===id);
  const cx=nd=>LW*(laneIdx(nd.lane)+.5),cy=nd=>Y0+RP*nd.row+RP/2-8;
  const hh=nd=>nd.kind==='gate'?66:nd.kind==='end'?44:NH;
  const defs=mk('defs');const m=mk('marker',{id:'laneHead',viewBox:'0 0 10 10',refX:8.5,refY:5,markerUnits:'userSpaceOnUse',markerWidth:12,markerHeight:12,orient:'auto'});m.append(mk('path',{d:'M1 1.2L8.6 5L1 8.8'}));defs.append(m);svg.append(defs);
- lanes.forEach((l,i)=>{svg.append(mk('rect',{x:i*LW,y:HH,width:LW,height:H-HH,class:i%2?'lane-bg lane-alt':'lane-bg'}));
-  const g=mk('g');g.append(mk('rect',{x:i*LW+6,y:8,width:LW-12,height:HH-18,rx:6,class:'seq-box'}));g.append(icon(l.icon,i*LW+18,HH/2-12,32));if(l.icon==='i-person')g.lastChild.setAttribute('style','color:var(--code)');g.append(mk('text',{x:i*LW+58,y:HH/2+1,class:'seq-name'},l.name));svg.append(g)});
+ lanes.forEach((l,i)=>{svg.append(mk('rect',{x:i*LW,y:0,width:LW,height:H,class:i%2?'lane-bg lane-alt':'lane-bg'}));head.append(mk('rect',{x:i*LW,y:0,width:LW,height:HH,class:i%2?'lane-bg lane-alt':'lane-bg'}));
+  const g=mk('g');g.append(mk('rect',{x:i*LW+6,y:8,width:LW-12,height:HH-18,rx:6,class:'seq-box'}));g.append(icon(l.icon,i*LW+18,HH/2-12,32));if(l.icon==='i-person')g.lastChild.setAttribute('style','color:var(--code)');g.append(mk('text',{x:i*LW+58,y:HH/2+1,class:'seq-name'},l.name));head.append(g)});
  const byId=Object.fromEntries(nodes.map(n=>[n.id,n]));
  const labels=[];
  links.forEach(L=>{const a=byId[L.from],b=byId[L.to];const s={x:cx(a)+(L.off||0),y:cy(a)+hh(a)/2},e={x:cx(b),y:cy(b)-hh(b)/2-3};const dy=e.y-s.y,d=Math.max(12,dy*.5);

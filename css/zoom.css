@@ -15,6 +15,10 @@
 .zoom-level{min-width:50px;text-align:center;font:600 13px var(--mono);color:var(--ink)}
 .zoom-sep{width:1px;align-self:stretch;margin:4px 2px;background:var(--line)}
 
+/* a pinned header (actor boxes, lane names) stays at the top while the body pans under it */
+.zoom-head-wrap{position:absolute;left:0;right:0;top:0;z-index:3;overflow:hidden;background:var(--soft);border-bottom:1px solid var(--line);box-shadow:0 3px 8px rgba(0,0,0,.08);pointer-events:none}
+.zoom-head-wrap svg{position:absolute;left:0;top:0;display:block;max-width:none;height:auto;transform-origin:0 0}
+
 /* full screen: only the diagram frame fills the screen */
 .zoom-frame:fullscreen{background:var(--ground);margin:0}
 .zoom-frame:fullscreen .zoom-viewport{border:0;border-radius:0}

@@ -41,6 +41,10 @@ js/button-icons.js  keeps the play button's icon in step with its label
 
 Canvas: each diagram is a pan-and-zoom canvas like Figma. Drag any empty background to move around, hold Ctrl and scroll to zoom at the pointer, or use the arrow keys and plus and minus when the frame has focus. A small toolbar floats inside each diagram, with zoom out, zoom in, fit to width, reset box positions (network only) and full screen. Full screen shows only the diagram. Fit frames the whole diagram. The frame keeps its size; the content scrolls inside it. Drag empty space to move around when zoomed in.
 
+Arrows: arrowheads show where information flows. Two heads mean it flows both ways: Git and CI (commit out, result back), Airflow and ClickHouse (read and write), Airflow and MLflow (log and load). Single arrows are one-way, and the App and API use two separate arrows because each direction is a different message. Line style shows the lane: solid for code, dashed for data, dotted for models, dash-dot for live app requests.
+
+Frozen headers: in the Sequence and Swimlane diagrams the actor boxes and lane names stay pinned at the top while you pan down, and follow horizontal pan and zoom.
+
 Boxes: drag any server box to rearrange the network and its arrows follow. With a box focused, Alt and an arrow key nudges it (add Shift for bigger steps). Reset layout puts them back. Dragging uses a mouse or pen; touch screens can tap boxes but not move them.
 
 The tech-stack icons are simplified redraws on a shared 32px grid, not the official logos.
